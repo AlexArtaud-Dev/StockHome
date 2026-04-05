@@ -1,0 +1,64 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser, JwtPayload } from '../../common/decorators/current-user.decorator';
+import { ContainerService } from './container.service';
+import { CreateContainerDto, UpdateContainerDto } from './container.dto';
+
+@Controller('api/v1/containers')
+@UseGuards(JwtAuthGuard)
+export class ContainerController {
+  constructor(private readonly containerService: ContainerService) {}
+
+  @Get()
+  findAll(
+    @CurrentUser() user: JwtPayload,
+    @Query('roomId') roomId?: string,
+  ) {
+    return this.containerService.findAll(user.householdId, roomId);
+  }
+
+  @Get('by-qr/:qrCode')
+  findByQrCode(
+    @Param('qrCode') qrCode: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.containerService.findByQrCode(qrCode, user.householdId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.containerService.findOne(id, user.householdId);
+  }
+
+  @Post()
+  create(@Body() dto: CreateContainerDto, @CurrentUser() user: JwtPayload) {
+    return this.containerService.create(dto, user.householdId);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateContainerDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.containerService.update(id, dto, user.householdId);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.containerService.remove(id, user.householdId);
+  }
+}

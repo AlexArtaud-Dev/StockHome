@@ -1,0 +1,75 @@
+.addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background-color: var(--color-bg-sunken);
+  transition: background-color var(--transition-fast);
+}
+
+.addBtn:hover { background-color: var(--color-border); }
+
+.loading, .errorMsg {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--color-text-muted);
+}
+.errorMsg { color: var(--color-danger); }
+
+.empty {
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+.emptyLink { color: var(--color-primary); font-weight: 500; }
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.containerCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  min-height: var(--touch-min);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
+}
+.containerCard:hover { box-shadow: var(--shadow-md); }
+
+.containerIcon { font-size: 1.5rem; flex-shrink: 0; }
+
+.containerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow: hidden;
+}
+
+.containerName {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.containerDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
