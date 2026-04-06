@@ -1,38 +1,39 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Package, Plus, QrCode } from 'lucide-react';
+import { Edit2, Package, Plus } from 'lucide-react';
 import { Layout } from '../../components/Layout/Layout';
 import { useApi } from '../../hooks/useApi';
 import { api } from '../../services/api';
 import { Container, Item } from '@stockhome/shared';
+import { ItemForm } from './ItemForm';
+import { ContainerForm } from '../Room/ContainerForm';
 import styles from './Container.module.css';
 
 export function ContainerPage() {
   const { id } = useParams<{ id: string }>();
   const [optimisticQuantities, setOptimisticQuantities] = useState<Record<string, number>>({});
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [editItem, setEditItem] = useState<Item | null>(null);
+  const [showEditContainer, setShowEditContainer] = useState(false);
 
-  const { data: container } = useApi<Container>(
+  const { data: container, refetch: refetchContainer } = useApi<Container>(
     (signal) => api.get(`/containers/${id!}`, signal),
     [id],
   );
 
-  const {
-    data: items,
-    isLoading,
-    error,
-    refetch,
-  } = useApi<Item[]>(
+  const { data: items, isLoading, error, refetch } = useApi<Item[]>(
     (signal) => api.get(`/items?containerId=${id!}`, signal),
     [id],
   );
 
   async function adjustQuantity(item: Item, delta: number) {
-    const newQty = Math.max(0, (optimisticQuantities[item.id] ?? item.quantity) + delta);
-    setOptimisticQuantities((prev) => ({ ...prev, [item.id]: newQty }));
+    const prev = optimisticQuantities[item.id] ?? item.quantity;
+    const next = Math.max(0, prev + delta);
+    setOptimisticQuantities((s) => ({ ...s, [item.id]: next }));
     try {
       await api.patch(`/items/${item.id}/quantity`, { delta });
     } catch {
-      setOptimisticQuantities((prev) => ({ ...prev, [item.id]: item.quantity }));
+      setOptimisticQuantities((s) => ({ ...s, [item.id]: item.quantity }));
       refetch();
     }
   }
@@ -42,24 +43,24 @@ export function ContainerPage() {
       title={container?.name ?? 'Container'}
       showBack
       actions={
-        <Link
-          to={`/containers/${id!}/bulk-add`}
-          className={styles.bulkBtn}
-          aria-label="Bulk add items"
-        >
-          <Plus size={20} />
-        </Link>
+        <>
+          <button
+            className={styles.iconBtn}
+            onClick={() => setShowEditContainer(true)}
+            aria-label="Edit container"
+          >
+            <Edit2 size={18} />
+          </button>
+          <button
+            className={styles.iconBtn}
+            onClick={() => setShowAddItem(true)}
+            aria-label="Add item"
+          >
+            <Plus size={20} />
+          </button>
+        </>
       }
     >
-      {container && (
-        <div className={styles.qrSection}>
-          <Link to={`/qr-export?containerIds=${container.id}`} className={styles.qrLink}>
-            <QrCode size={16} />
-            <span>View QR code</span>
-          </Link>
-        </div>
-      )}
-
       {isLoading && <p className={styles.loading}>Loading…</p>}
       {error && <p className={styles.errorMsg}>{error}</p>}
 
@@ -67,9 +68,9 @@ export function ContainerPage() {
         <div className={styles.empty}>
           <Package size={40} />
           <p>Empty container.</p>
-          <Link to={`/containers/${id!}/bulk-add`} className={styles.emptyLink}>
+          <button className={styles.emptyLink} onClick={() => setShowAddItem(true)}>
             Add items
-          </Link>
+          </button>
         </div>
       )}
 
@@ -78,9 +79,17 @@ export function ContainerPage() {
           const qty = optimisticQuantities[item.id] ?? item.quantity;
           return (
             <div key={item.id} className={styles.itemRow}>
-              <Link to={`/items/${item.id}`} className={styles.itemName}>
-                {item.name}
-              </Link>
+              <button
+                className={styles.itemName}
+                onClick={() => setEditItem(item)}
+              >
+                <span>{item.name}</span>
+                {item.tags && item.tags.length > 0 && (
+                  <span className={styles.itemTags}>
+                    {item.tags.map((t) => t.name).join(', ')}
+                  </span>
+                )}
+              </button>
               <div className={styles.quantityControl}>
                 <button
                   className={styles.qtyBtn}
@@ -103,6 +112,32 @@ export function ContainerPage() {
           );
         })}
       </div>
+
+      {showAddItem && container && (
+        <ItemForm
+          containerId={container.id}
+          roomId={container.roomId}
+          onClose={() => setShowAddItem(false)}
+          onSaved={refetch}
+        />
+      )}
+      {editItem && container && (
+        <ItemForm
+          containerId={container.id}
+          roomId={container.roomId}
+          item={editItem}
+          onClose={() => setEditItem(null)}
+          onSaved={refetch}
+        />
+      )}
+      {showEditContainer && container && (
+        <ContainerForm
+          roomId={container.roomId}
+          container={container}
+          onClose={() => setShowEditContainer(false)}
+          onSaved={() => { refetchContainer(); refetch(); }}
+        />
+      )}
     </Layout>
   );
 }
