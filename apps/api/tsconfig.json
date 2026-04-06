@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@stockhome/shared": ["../../packages/shared/src/index.ts"]
+      "@stockhome/shared": ["../../packages/shared/dist/index"]
     }
   },
   "include": ["src"],
