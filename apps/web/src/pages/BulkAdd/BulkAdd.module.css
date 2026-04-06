@@ -1,0 +1,84 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.error {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.inputRow {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.input {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  min-height: var(--touch-min);
+  transition: border-color var(--transition-fast);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.addBtn {
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  min-height: var(--touch-min);
+  flex-shrink: 0;
+  transition: background-color var(--transition-fast);
+}
+.addBtn:hover:not(:disabled) { background-color: var(--color-primary-hover); }
+.addBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.addedList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.addedTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.addedRow {
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.doneBtn {
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  min-height: var(--touch-min);
+  margin-top: var(--space-4);
+  transition: background-color var(--transition-fast);
+}
+.doneBtn:hover { background-color: var(--color-bg-sunken); }

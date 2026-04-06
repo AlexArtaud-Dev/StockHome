@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-change_me_in_production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change_me_refresh_secret}
+      - DB_PATH=/app/data/stockhome.db
+      - UPLOAD_DIR=/app/data/uploads
+      - PORT=3001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped

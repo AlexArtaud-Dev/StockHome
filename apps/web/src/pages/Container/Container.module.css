@@ -1,0 +1,99 @@
+.bulkBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background-color: var(--color-bg-sunken);
+  transition: background-color var(--transition-fast);
+}
+.bulkBtn:hover { background-color: var(--color-border); }
+
+.qrSection {
+  margin-bottom: var(--space-4);
+}
+.qrLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.loading, .errorMsg {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--color-text-muted);
+}
+.errorMsg { color: var(--color-danger); }
+
+.empty {
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+.emptyLink { color: var(--color-primary); font-weight: 500; }
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  min-height: var(--touch-min);
+}
+
+.itemName {
+  flex: 1;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.itemName:hover { color: var(--color-primary); }
+
+.quantityControl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.qtyBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-sunken);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  transition: background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+.qtyBtn:hover:not(:disabled) { background-color: var(--color-border); }
+.qtyBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.qty {
+  min-width: 28px;
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+}
