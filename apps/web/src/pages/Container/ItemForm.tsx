@@ -49,19 +49,25 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
     setError(null);
     setIsSaving(true);
     try {
-      const payload = {
-        name,
-        description: description || null,
-        quantity: parseInt(quantity, 10) || 1,
-        isConsumable,
-        tagNames: tags,
-        containerId,
-        roomId,
-      };
       if (isEdit && item) {
-        await api.patch(`/items/${item.id}`, payload);
+        await api.patch(`/items/${item.id}`, {
+          name,
+          description: description || null,
+          quantity: parseInt(quantity, 10) || 1,
+          isConsumable,
+          tagNames: tags,
+          containerId,
+        });
       } else {
-        await api.post('/items', payload);
+        await api.post('/items', {
+          name,
+          description: description || null,
+          quantity: parseInt(quantity, 10) || 1,
+          isConsumable,
+          tagNames: tags,
+          containerId,
+          roomId,
+        });
       }
       onSaved();
       onClose();
