@@ -7,6 +7,7 @@ import { CategoryEntity } from '../../database/entities/category.entity';
 import { TagEntity } from '../../database/entities/tag.entity';
 import { MovementLogEntity } from '../../database/entities/movement-log.entity';
 import { RoomEntity } from '../../database/entities/room.entity';
+import { ContainerEntity } from '../../database/entities/container.entity';
 import { AdjustQuantityDto, BulkCreateItemDto, CreateItemDto, UpdateItemDto } from './item.dto';
 import { Item } from '@stockhome/shared';
 
@@ -63,8 +64,8 @@ export class ItemService {
     const item = this.itemRepo.create({
       id: uuidv4(),
       householdId,
-      roomId: dto.roomId,
-      containerId: dto.containerId ?? null,
+      room: { id: dto.roomId },
+      container: dto.containerId ? { id: dto.containerId } : null,
       name: dto.name,
       description: dto.description ?? null,
       quantity: dto.quantity ?? 1,
@@ -92,7 +93,10 @@ export class ItemService {
 
     const prevContainerId = item.containerId;
 
-    if (dto.containerId !== undefined) item.containerId = dto.containerId ?? null;
+    if (dto.containerId !== undefined) {
+      item.container = dto.containerId ? { id: dto.containerId } as ContainerEntity : null;
+      item.containerId = dto.containerId ?? null;
+    }
     if (dto.name !== undefined) item.name = dto.name;
     if (dto.description !== undefined) item.description = dto.description ?? null;
     if (dto.quantity !== undefined) item.quantity = dto.quantity;

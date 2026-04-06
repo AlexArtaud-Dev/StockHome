@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -30,8 +31,10 @@ export class MovementLogEntity {
   createdAt!: Date;
 
   @ManyToOne(() => ItemEntity)
+  @JoinColumn({ name: 'itemId' })
   item!: ItemEntity;
 
   @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: 'userId' })
   user!: UserEntity;
 }
