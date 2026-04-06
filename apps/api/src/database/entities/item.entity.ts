@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -79,7 +78,6 @@ export class ItemEntity {
   })
   tags!: TagEntity[];
 
-  @OneToOne(() => StockRuleEntity, (rule) => rule.item, { nullable: true })
-  @JoinColumn({ name: 'id', referencedColumnName: 'itemId' })
+  @OneToOne(() => StockRuleEntity, (rule) => rule.item, { nullable: true, eager: false })
   stockRule!: StockRuleEntity | null;
 }
