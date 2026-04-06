@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -32,5 +33,6 @@ export class StockRuleEntity {
   updatedAt!: Date;
 
   @OneToOne(() => ItemEntity, (item) => item.stockRule)
+  @JoinColumn({ name: 'itemId' })
   item!: ItemEntity;
 }
