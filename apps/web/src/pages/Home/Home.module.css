@@ -83,3 +83,31 @@
   font-weight: 600;
   font-size: var(--font-size-md);
 }
+
+.roomWrapper {
+  position: relative;
+}
+
+.editBtn {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  background-color: rgba(0,0,0,0.15);
+  color: white;
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.roomWrapper:hover .editBtn,
+.roomWrapper:focus-within .editBtn {
+  opacity: 1;
+}

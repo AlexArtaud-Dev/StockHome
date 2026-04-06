@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Layout } from '../../components/Layout/Layout';
+import { useApi } from '../../hooks/useApi';
 import { api } from '../../services/api';
+import { Container } from '@stockhome/shared';
 import styles from './BulkAdd.module.css';
 
 export function BulkAddPage() {
@@ -13,18 +15,23 @@ export function BulkAddPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  const { data: container } = useApi<Container>(
+    (signal) => api.get(`/containers/${containerId!}`, signal),
+    [containerId],
+  );
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
   async function handleAdd() {
-    if (!name.trim() || !containerId) return;
+    if (!name.trim() || !containerId || !container) return;
     setIsSaving(true);
     setError(null);
     try {
       await api.post('/items', {
         containerId,
-        roomId: undefined,
+        roomId: container.roomId,
         name: name.trim(),
         quantity: 1,
       });
@@ -59,12 +66,12 @@ export function BulkAddPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isSaving}
+            disabled={isSaving || !container}
           />
           <button
             className={styles.addBtn}
             onClick={() => handleAdd().catch(() => null)}
-            disabled={!name.trim() || isSaving}
+            disabled={!name.trim() || isSaving || !container}
           >
             Add
           </button>
@@ -76,9 +83,7 @@ export function BulkAddPage() {
           <div className={styles.addedList}>
             <h3 className={styles.addedTitle}>Added ({added.length})</h3>
             {[...added].reverse().map((item, i) => (
-              <div key={i} className={styles.addedRow}>
-                ✓ {item}
-              </div>
+              <div key={i} className={styles.addedRow}>✓ {item}</div>
             ))}
           </div>
         )}

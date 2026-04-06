@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Fts5Service } from './fts5.service';
 import { HouseholdEntity } from './entities/household.entity';
 import { UserEntity } from './entities/user.entity';
 import { RoomEntity } from './entities/room.entity';
@@ -31,5 +32,7 @@ import { MovementLogEntity } from './entities/movement-log.entity';
       }),
     }),
   ],
+  providers: [Fts5Service],
+  exports: [Fts5Service],
 })
 export class DatabaseModule {}

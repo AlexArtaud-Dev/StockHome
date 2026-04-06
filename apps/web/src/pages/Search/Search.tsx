@@ -57,7 +57,7 @@ export function SearchPage() {
         {results?.map((item) => (
           <Link
             key={item.id}
-            to={item.containerId ? `/containers/${item.containerId}` : `/items/${item.id}`}
+            to={`/items/${item.id}`}
             className={styles.resultRow}
           >
             <div className={styles.resultName}>{item.name}</div>
