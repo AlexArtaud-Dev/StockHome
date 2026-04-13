@@ -1,8 +1,10 @@
 import 'reflect-metadata';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as fs from 'fs';
-import * as path from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
