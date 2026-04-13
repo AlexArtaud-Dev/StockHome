@@ -6,6 +6,8 @@ interface HouseholdContextValue {
   households: Household[];
   selectedHouseholdId: string | null;
   selectedHousehold: Household | null;
+  hasHousehold: boolean;
+  householdsLoaded: boolean;
   setSelectedHousehold: (id: string) => void;
   refreshHouseholds: () => Promise<void>;
   isLoading: boolean;
@@ -19,10 +21,14 @@ export function HouseholdProvider({ children }: { children: React.ReactNode }) {
     () => localStorage.getItem('selectedHouseholdId'),
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [householdsLoaded, setHouseholdsLoaded] = useState(false);
 
   const refreshHouseholds = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
-    if (!token) return;
+    if (!token) {
+      setHouseholdsLoaded(true);
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -51,6 +57,7 @@ export function HouseholdProvider({ children }: { children: React.ReactNode }) {
       // Auth errors handled by api.ts
     } finally {
       setIsLoading(false);
+      setHouseholdsLoaded(true);
     }
   }, [selectedHouseholdId]);
 
@@ -65,6 +72,7 @@ export function HouseholdProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const selectedHousehold = households.find((h) => h.id === selectedHouseholdId) ?? null;
+  const hasHousehold = households.length > 0;
 
   return (
     <HouseholdContext.Provider
@@ -72,6 +80,8 @@ export function HouseholdProvider({ children }: { children: React.ReactNode }) {
         households,
         selectedHouseholdId,
         selectedHousehold,
+        hasHousehold,
+        householdsLoaded,
         setSelectedHousehold,
         refreshHouseholds,
         isLoading,

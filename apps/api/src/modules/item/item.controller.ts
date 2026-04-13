@@ -12,12 +12,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { HouseholdGuard } from '../../common/guards/household.guard';
 import { CurrentUser, JwtPayload } from '../../common/decorators/current-user.decorator';
 import { ItemService } from './item.service';
 import { AdjustQuantityDto, BulkCreateItemDto, CreateItemDto, UpdateItemDto } from './item.dto';
 
 @Controller('api/v1/items')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HouseholdGuard)
 export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 
@@ -32,7 +33,7 @@ export class ItemController {
 
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return this.itemService.findOne(id, user.householdId);
+    return this.itemService.findOne(id, user.householdId!);
   }
 
   @Post()

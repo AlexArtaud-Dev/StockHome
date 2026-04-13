@@ -11,23 +11,24 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { HouseholdGuard } from '../../common/guards/household.guard';
 import { CurrentUser, JwtPayload } from '../../common/decorators/current-user.decorator';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './category.dto';
 
 @Controller('api/v1/categories')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HouseholdGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
   findAll(@CurrentUser() user: JwtPayload) {
-    return this.categoryService.findAll(user.householdId);
+    return this.categoryService.findAll(user.householdId!);
   }
 
   @Post()
   create(@Body() dto: CreateCategoryDto, @CurrentUser() user: JwtPayload) {
-    return this.categoryService.create(dto, user.householdId);
+    return this.categoryService.create(dto, user.householdId!);
   }
 
   @Patch(':id')
@@ -36,12 +37,12 @@ export class CategoryController {
     @Body() dto: UpdateCategoryDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.categoryService.update(id, dto, user.householdId);
+    return this.categoryService.update(id, dto, user.householdId!);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return this.categoryService.remove(id, user.householdId);
+    return this.categoryService.remove(id, user.householdId!);
   }
 }

@@ -27,12 +27,12 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { households, selectedHousehold, setSelectedHousehold } = useHousehold();
+  const { households, selectedHousehold, setSelectedHousehold, hasHousehold } = useHousehold();
   const [showHouseholdDropdown, setShowHouseholdDropdown] = useState(false);
 
   return (
     <div className={styles.shell}>
-      <nav className={styles.nav} aria-label="Main navigation">
+      {hasHousehold && <nav className={styles.nav} aria-label="Main navigation">
         <div className={styles.navBrand}>
           <Package size={22} />
           StockHome
@@ -100,7 +100,7 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
           <User size={20} />
           <span>{t('nav.account')}</span>
         </NavLink>
-      </nav>
+      </nav>}
 
       <div className={styles.mainArea}>
         {title !== undefined && (
