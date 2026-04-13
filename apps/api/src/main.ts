@@ -1,7 +1,18 @@
 import 'reflect-metadata';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+// Try several candidate locations for .env (monorepo root, api root, cwd)
+const envCandidates = [
+  path.resolve(__dirname, '../../../.env'),   // dist/main.js → monorepo root
+  path.resolve(__dirname, '../../.env'),      // src/main.ts  → monorepo root (ts-node)
+  path.resolve(process.cwd(), '.env'),        // wherever npm is invoked from
+];
+for (const p of envCandidates) {
+  const result = dotenv.config({ path: p });
+  if (!result.error) { console.log(`[dotenv] Loaded ${p}`); break; }
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as fs from 'fs';
