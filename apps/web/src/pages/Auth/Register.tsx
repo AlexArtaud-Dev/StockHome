@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { ApiError } from '../../services/api';
 import styles from './Auth.module.css';
 
 export function RegisterPage() {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    username: '',
+    email: '',
+    firstName: '',
+    lastName: '',
     password: '',
-    displayName: '',
-    householdName: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,14 +28,14 @@ export function RegisterPage() {
     setIsLoading(true);
     try {
       await register({
-        username: form.username,
+        email: form.email,
+        firstName: form.firstName,
+        lastName: form.lastName,
         password: form.password,
-        displayName: form.displayName || undefined,
-        householdName: form.householdName,
       });
-      navigate('/');
+      navigate(`/auth/verify-email?email=${encodeURIComponent(form.email)}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Registration failed');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -43,51 +45,56 @@ export function RegisterPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <h1 className={styles.title}>StockHome</h1>
-        <p className={styles.subtitle}>Create your household</p>
+        <p className={styles.subtitle}>{t('auth.registerSubtitle')}</p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           {error && <div className={styles.error}>{error}</div>}
 
+          <div className={styles.fieldRow}>
+            <div className={styles.field}>
+              <label htmlFor="firstName">{t('auth.firstName')}</label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                autoComplete="given-name"
+                placeholder={t('auth.firstNamePlaceholder')}
+                value={form.firstName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="lastName">{t('auth.lastName')}</label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                autoComplete="family-name"
+                placeholder={t('auth.lastNamePlaceholder')}
+                value={form.lastName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
           <div className={styles.field}>
-            <label htmlFor="householdName">Household name</label>
+            <label htmlFor="email">{t('auth.email')}</label>
             <input
-              id="householdName"
-              name="householdName"
-              type="text"
-              value={form.householdName}
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder={t('auth.emailPlaceholder')}
+              value={form.email}
               onChange={handleChange}
-              placeholder="e.g. Smith Family"
               required
             />
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="displayName">Your name (optional)</label>
-            <input
-              id="displayName"
-              name="displayName"
-              type="text"
-              value={form.displayName}
-              onChange={handleChange}
-              placeholder="e.g. Alex"
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="username">Username</label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              value={form.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="password">Password (min 8 characters)</label>
+            <label htmlFor="password">{t('auth.password')}</label>
             <input
               id="password"
               name="password"
@@ -101,13 +108,13 @@ export function RegisterPage() {
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-            {isLoading ? 'Creating…' : 'Create household'}
+            {isLoading ? t('auth.creating') : t('auth.createAccount')}
           </button>
         </form>
 
         <p className={styles.switchLink}>
-          Already have an account?{' '}
-          <Link to="/auth/login">Sign in</Link>
+          {t('auth.alreadyHaveAccount')}{' '}
+          <Link to="/auth/login">{t('auth.signInLink')}</Link>
         </p>
       </div>
     </div>

@@ -12,6 +12,8 @@ export interface SearchResult {
   quantity: number;
   icon: string | null;
   isConsumable: boolean;
+  roomName: string;
+  containerName: string | null;
 }
 
 @Injectable()
@@ -26,15 +28,23 @@ export class SearchService {
 
     // FTS5 search via raw query
     const sanitized = query.replace(/["']/g, '');
+    // FTS5 virtual-table MATCH requires the literal table name — aliasing it
+    // causes "no such column" errors. Use a correlated subquery instead.
     const rows = await this.dataSource.query<SearchResult[]>(
       `
-      SELECT i.id, i.name, i.description, i.container_id as containerId,
-             i.room_id as roomId, i.household_id as householdId,
-             i.quantity, i.icon, i.is_consumable as isConsumable
+      SELECT i.id, i.name, i.description, i.containerId,
+             i.roomId, i.householdId,
+             i.quantity, i.icon, i.isConsumable,
+             r.name as roomName,
+             c.name as containerName
       FROM item i
-      INNER JOIN item_fts fts ON fts.rowid = i.rowid
-      WHERE fts MATCH ? AND i.household_id = ?
-      ORDER BY rank
+      LEFT JOIN room r ON r.id = i.roomId
+      LEFT JOIN container c ON c.id = i.containerId
+      WHERE i.rowid IN (
+        SELECT rowid FROM item_fts WHERE item_fts MATCH ?
+      )
+      AND i.householdId = ?
+      ORDER BY r.name ASC, c.name ASC, i.name ASC
       LIMIT 50
       `,
       [`"${sanitized}"*`, householdId],

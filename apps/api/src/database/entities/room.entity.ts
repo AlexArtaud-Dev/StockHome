@@ -28,6 +28,9 @@ export class RoomEntity {
   @Column({ type: 'text', nullable: true })
   color!: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  photoPath!: string | null;
+
   @Column({ type: 'integer', default: 0 })
   sortOrder!: number;
 

@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Layout } from '../../components/Layout/Layout';
 import { api, ApiError } from '../../services/api';
 import { Container } from '@stockhome/shared';
 import styles from './Scan.module.css';
 
 export function ScanPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -59,28 +61,38 @@ export function ScanPage() {
 
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      stream?.getTracks().forEach((t) => t.stop());
+      stream?.getTracks().forEach((track) => track.stop());
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleQrCode(qrCode: string) {
+  async function handleQrCode(scanned: string) {
     try {
-      const container = await api.get<Container>(`/containers/by-qr/${qrCode}`);
+      try {
+        const url = new URL(scanned);
+        const match = url.pathname.match(/\/containers\/([^/]+)$/);
+        if (match) {
+          navigate(`/containers/${match[1]}`);
+          return;
+        }
+      } catch {
+        // Not a valid URL — fall through to API lookup by raw qrCode field
+      }
+
+      const container = await api.get<Container>(`/containers/by-qr/${encodeURIComponent(scanned)}`);
       navigate(`/containers/${container.id}`);
     } catch (err) {
       const msg =
         err instanceof ApiError && err.statusCode === 404
-          ? 'QR code not found in your household.'
-          : 'Failed to resolve QR code.';
+          ? t('scan.notFound')
+          : t('common.error');
       setError(msg);
       setScanning(true);
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     }
   }
 
   return (
-    <Layout title="Scan QR Code" showBack>
+    <Layout title={t('scan.title')} showBack>
       <div className={styles.scanContainer}>
         {error && <div className={styles.error}>{error}</div>}
 

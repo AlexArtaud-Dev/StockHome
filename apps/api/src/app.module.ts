@@ -4,6 +4,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EmailModule } from './modules/email/email.module';
 import { HouseholdModule } from './modules/household/household.module';
 import { UserModule } from './modules/user/user.module';
 import { RoomModule } from './modules/room/room.module';
@@ -16,6 +17,8 @@ import { QrModule } from './modules/qr/qr.module';
 import { SearchModule } from './modules/search/search.module';
 import { MovementLogModule } from './modules/movement-log/movement-log.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { ExportModule } from './modules/export/export.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -27,6 +30,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
       rootPath: path.join(process.env['UPLOAD_DIR'] ?? './data/uploads'),
       serveRoot: '/uploads',
     }),
+    EmailModule,
     AuthModule,
     HouseholdModule,
     UserModule,
@@ -40,6 +44,8 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     SearchModule,
     MovementLogModule,
     UploadModule,
+    AdminModule,
+    ExportModule,
   ],
   providers: [
     {

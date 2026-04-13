@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { ContainerEntity } from '../../database/entities/container.entity';
 import { RoomEntity } from '../../database/entities/room.entity';
+import { ItemEntity } from '../../database/entities/item.entity';
 import { CreateContainerDto, UpdateContainerDto } from './container.dto';
 import { Container } from '@stockhome/shared';
 
@@ -18,9 +19,11 @@ export class ContainerService {
     private readonly containerRepo: Repository<ContainerEntity>,
     @InjectRepository(RoomEntity)
     private readonly roomRepo: Repository<RoomEntity>,
+    @InjectRepository(ItemEntity)
+    private readonly itemRepo: Repository<ItemEntity>,
   ) {}
 
-  async findAll(householdId: string, roomId?: string): Promise<Container[]> {
+  async findAll(householdId: string, roomId?: string, parentContainerId?: string): Promise<Container[]> {
     const queryBuilder = this.containerRepo
       .createQueryBuilder('c')
       .innerJoin('c.room', 'r')
@@ -28,6 +31,12 @@ export class ContainerService {
 
     if (roomId) {
       queryBuilder.andWhere('c.roomId = :roomId', { roomId });
+    }
+
+    if (parentContainerId === 'none') {
+      queryBuilder.andWhere('c.parentContainerId IS NULL');
+    } else if (parentContainerId) {
+      queryBuilder.andWhere('c.parentContainerId = :parentContainerId', { parentContainerId });
     }
 
     const containers = await queryBuilder
@@ -62,7 +71,21 @@ export class ContainerService {
     return this.toDto(container);
   }
 
+  private async getContainerDepth(containerId: string): Promise<number> {
+    let depth = 0;
+    let currentId: string | null = containerId;
+    while (currentId) {
+      const c = await this.containerRepo.findOneBy({ id: currentId });
+      if (!c) break;
+      currentId = c.parentContainerId;
+      depth++;
+    }
+    return depth;
+  }
+
   async create(dto: CreateContainerDto, householdId: string): Promise<Container> {
+    const maxDepth = parseInt(process.env['MAX_CONTAINER_DEPTH'] ?? '3', 10);
+
     const room = await this.roomRepo.findOneBy({
       id: dto.roomId,
       householdId,
@@ -76,6 +99,12 @@ export class ContainerService {
       if (!parent) throw new NotFoundException('Parent container not found');
       if (parent.roomId !== dto.roomId) {
         throw new BadRequestException('Parent container must be in the same room');
+      }
+      const parentDepth = await this.getContainerDepth(dto.parentContainerId);
+      if (parentDepth >= maxDepth) {
+        throw new BadRequestException(
+          `Maximum container nesting depth of ${maxDepth} reached`,
+        );
       }
     }
 
@@ -112,6 +141,63 @@ export class ContainerService {
     Object.assign(container, dto);
     await this.containerRepo.save(container);
     return this.toDto(container);
+  }
+
+  async duplicate(id: string, householdId: string): Promise<Container> {
+    const container = await this.containerRepo
+      .createQueryBuilder('c')
+      .innerJoin('c.room', 'r')
+      .where('c.id = :id', { id })
+      .andWhere('r.householdId = :householdId', { householdId })
+      .getOne();
+    if (!container) throw new NotFoundException('Container not found');
+
+    const copy = await this.deepCopyContainer(container, container.parentContainerId, `${container.name} (copy)`);
+    return this.toDto(copy);
+  }
+
+  private async deepCopyContainer(
+    source: ContainerEntity,
+    newParentId: string | null,
+    newName?: string,
+  ): Promise<ContainerEntity> {
+    const copy = this.containerRepo.create({
+      id: uuidv4(),
+      roomId: source.roomId,
+      parentContainerId: newParentId,
+      name: newName ?? source.name,
+      description: source.description,
+      type: source.type,
+      icon: source.icon,
+      qrCode: uuidv4(),
+      sortOrder: source.sortOrder,
+    });
+    await this.containerRepo.save(copy);
+
+    // Copy items
+    const items = await this.itemRepo.findBy({ containerId: source.id });
+    for (const item of items) {
+      const itemCopy = this.itemRepo.create({
+        id: uuidv4(),
+        householdId: item.householdId,
+        roomId: item.roomId,
+        containerId: copy.id,
+        name: item.name,
+        description: item.description,
+        quantity: item.quantity,
+        icon: item.icon,
+        isConsumable: item.isConsumable,
+      });
+      await this.itemRepo.save(itemCopy);
+    }
+
+    // Recursively copy child containers
+    const children = await this.containerRepo.findBy({ parentContainerId: source.id });
+    for (const child of children) {
+      await this.deepCopyContainer(child, copy.id);
+    }
+
+    return copy;
   }
 
   async remove(id: string, householdId: string): Promise<void> {

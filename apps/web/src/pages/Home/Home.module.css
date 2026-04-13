@@ -9,10 +9,7 @@
   background-color: var(--color-bg-sunken);
   transition: background-color var(--transition-fast);
 }
-
-.addBtn:hover {
-  background-color: var(--color-border);
-}
+.addBtn:hover { background-color: var(--color-border); }
 
 .loading,
 .errorMsg {
@@ -20,38 +17,42 @@
   padding: var(--space-8);
   color: var(--color-text-muted);
 }
-
-.errorMsg {
-  color: var(--color-danger);
-}
+.errorMsg { color: var(--color-danger); }
 
 .empty {
-  text-align: center;
-  padding: var(--space-12) var(--space-4);
-  color: var(--color-text-muted);
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-muted);
   gap: var(--space-3);
 }
-
 .emptyLink {
   color: var(--color-primary);
   font-weight: 500;
 }
 
+/* ── Grid ───────────────────────────────────────────────────────── */
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
+  gap: var(--space-4);
+}
 
-  @media (min-width: 480px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
+@media (min-width: 480px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
 
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
+@media (min-width: 768px) {
+  .grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── Room card ───────────────────────────────────────────────────── */
+.roomWrapper {
+  position: relative;
 }
 
 .roomCard {
@@ -59,35 +60,48 @@
   flex-direction: column;
   background-color: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
-  min-height: 100px;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
+  text-decoration: none;
+  color: var(--color-text);
 }
 
 .roomCard:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
-.roomColor {
-  height: 6px;
-}
-
-.roomName {
-  flex: 1;
+/* ── Hero area (photo or colored background with emoji) ─────────── */
+.roomHero {
+  height: 96px;
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
-  padding: var(--space-4);
-  font-weight: 600;
-  font-size: var(--font-size-md);
-}
-
-.roomWrapper {
+  justify-content: center;
   position: relative;
 }
 
+.roomHeroIcon {
+  font-size: 2.6rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25));
+}
+
+/* ── Name strip ──────────────────────────────────────────────────── */
+.roomName {
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Edit button ─────────────────────────────────────────────────── */
 .editBtn {
   position: absolute;
   top: var(--space-2);
@@ -95,19 +109,19 @@
   width: 28px;
   height: 28px;
   border-radius: var(--radius-md);
-  background-color: rgba(0,0,0,0.15);
+  background-color: rgba(0, 0, 0, 0.3);
   color: white;
-  font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity var(--transition-fast);
-  line-height: 1;
-  letter-spacing: 1px;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast);
+  backdrop-filter: blur(4px);
 }
-
 .roomWrapper:hover .editBtn,
 .roomWrapper:focus-within .editBtn {
   opacity: 1;
+}
+.editBtn:hover {
+  background-color: rgba(0, 0, 0, 0.5);
 }

@@ -1,9 +1,10 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
+/* ── Field ──────────────────────────────────────────────────────────── */
 .field {
   display: flex;
   flex-direction: column;
@@ -12,27 +13,47 @@
 
 .field label {
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text);
+  letter-spacing: 0.01em;
+}
+
+.hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: calc(var(--space-1) * -1);
 }
 
 .field input,
 .field textarea,
 .field select {
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border);
+  padding: 10px var(--space-4);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: var(--color-bg);
+  background-color: var(--color-bg-elevated);
   color: var(--color-text);
+  font-family: var(--font-sans);
   font-size: var(--font-size-md);
   min-height: var(--touch-min);
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   width: 100%;
 }
 
 .field textarea {
-  min-height: 80px;
+  min-height: 88px;
   resize: vertical;
+  line-height: var(--line-height-normal);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.field input:hover,
+.field textarea:hover,
+.field select:hover {
+  border-color: var(--color-border-strong);
 }
 
 .field input:focus,
@@ -40,37 +61,56 @@
 .field select:focus {
   outline: none;
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
 .field select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right var(--space-3) center;
-  padding-right: var(--space-8);
+  background-position: right var(--space-4) center;
+  padding-right: var(--space-10);
+  cursor: pointer;
 }
 
+/* ── Checkbox / toggle row ─────────────────────────────────────────── */
 .checkRow {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-bg-sunken);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
   min-height: var(--touch-min);
 }
 
+.checkRow:has(input:checked) {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
 .checkRow input[type='checkbox'] {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   accent-color: var(--color-primary);
   flex-shrink: 0;
+  cursor: pointer;
   min-height: unset;
+  border: none;
+  padding: 0;
 }
 
 .checkRow label {
   font-size: var(--font-size-md);
-  font-weight: 400;
+  font-weight: 500;
   cursor: pointer;
+  letter-spacing: 0;
 }
 
+/* ── Color swatches ───────────────────────────────────────────────── */
 .colorRow {
   display: flex;
   gap: var(--space-2);
@@ -78,96 +118,172 @@
 }
 
 .colorSwatch {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-full);
-  border: 3px solid transparent;
+  border: 2.5px solid transparent;
   cursor: pointer;
-  transition: transform var(--transition-fast), border-color var(--transition-fast);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
   flex-shrink: 0;
 }
-.colorSwatch:hover { transform: scale(1.1); }
-.colorSwatch.selected { border-color: var(--color-text); }
+.colorSwatch:hover { transform: scale(1.12); }
+.colorSwatch.selected {
+  border-color: var(--color-text);
+  box-shadow: 0 0 0 2px var(--color-bg-elevated);
+}
 
+/* ── Error / alert ────────────────────────────────────────────────── */
 .error {
   background-color: var(--color-danger-bg);
   color: var(--color-danger);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
+  font-weight: 500;
+  border: 1px solid var(--color-danger-border, var(--color-danger-bg));
 }
 
+/* ── Divider ──────────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-1) 0;
+}
+
+/* ── Actions ──────────────────────────────────────────────────────── */
 .actions {
   display: flex;
   gap: var(--space-3);
-  margin-top: var(--space-2);
+  padding-top: var(--space-2);
 }
 
 .submitBtn {
   flex: 1;
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--color-primary);
-  color: var(--color-primary-text);
+  padding: 11px var(--space-5);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  color: #fff;
   border-radius: var(--radius-md);
   font-weight: 600;
   font-size: var(--font-size-md);
   min-height: var(--touch-min);
-  transition: background-color var(--transition-fast);
+  letter-spacing: -0.01em;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
 }
-.submitBtn:hover:not(:disabled) { background-color: var(--color-primary-hover); }
-.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.92;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+.submitBtn:active:not(:disabled) { transform: scale(0.98); }
+.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
 
 .deleteBtn {
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--color-danger-bg);
+  padding: 11px var(--space-4);
+  background-color: transparent;
   color: var(--color-danger);
-  border: 1px solid var(--color-danger);
+  border: 1.5px solid var(--color-danger-border, var(--color-danger));
   border-radius: var(--radius-md);
   font-weight: 600;
+  font-size: var(--font-size-sm);
   min-height: var(--touch-min);
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
-.deleteBtn:hover { background-color: var(--color-danger); color: white; }
+.deleteBtn:hover { background-color: var(--color-danger); color: #fff; }
 
+.duplicateBtn {
+  padding: 11px var(--space-4);
+  background-color: transparent;
+  color: var(--color-text-muted);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  min-height: var(--touch-min);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.duplicateBtn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: rgba(99, 102, 241, 0.06);
+}
+
+/* ── Tag input ────────────────────────────────────────────────────── */
 .tagInput {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: var(--color-bg);
+  background-color: var(--color-bg-elevated);
   min-height: var(--touch-min);
   cursor: text;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.tagInput:focus-within { border-color: var(--color-primary); }
+.tagInput:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
 
 .tag {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 2px var(--space-2);
-  background-color: var(--color-bg-sunken);
-  border: 1px solid var(--color-border);
+  gap: 4px;
+  padding: 4px 10px 4px 10px;
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(99, 102, 241, 0.25);
   border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast);
+}
+.tag:hover {
+  background-color: rgba(99, 102, 241, 0.16);
 }
 .tagRemove {
   display: flex;
   align-items: center;
-  color: var(--color-text-muted);
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  opacity: 0.55;
   cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast);
 }
-.tagRemove:hover { color: var(--color-danger); }
+.tagRemove:hover {
+  opacity: 1;
+  background-color: rgba(99, 102, 241, 0.2);
+}
 
 .tagRawInput {
   border: none;
   background: none;
   color: var(--color-text);
+  font-family: var(--font-sans);
   font-size: var(--font-size-sm);
   min-width: 80px;
   flex: 1;
-  padding: 2px 0;
+  padding: 3px 0;
 }
 .tagRawInput:focus { outline: none; }
+
+/* ── Sub-section heading ────────────────────────────────────────────── */
+.subSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-bg-sunken);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+}
+
+.subSection .field label {
+  color: var(--color-text-muted);
+}

@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @IsString()
+  @IsEmail()
   @IsNotEmpty()
-  username!: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -11,25 +11,37 @@ export class LoginDto {
 }
 
 export class RegisterDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
+
   @IsString()
   @IsNotEmpty()
-  username!: string;
+  firstName!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName!: string;
 
   @IsString()
   @MinLength(8)
   password!: string;
-
-  @IsString()
-  @IsOptional()
-  displayName?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  householdName!: string;
 }
 
 export class RefreshTokenDto {
   @IsString()
   @IsNotEmpty()
   refreshToken!: string;
+}
+
+export class VerifyEmailDto {
+  @IsString()
+  @IsNotEmpty()
+  token!: string;
+}
+
+export class ResendVerificationDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
 }

@@ -13,6 +13,10 @@ export class CreateRoomDto {
   @IsOptional()
   color?: string;
 
+  @IsString()
+  @IsOptional()
+  photoPath?: string;
+
   @IsInt()
   @Min(0)
   @IsOptional()
@@ -31,6 +35,10 @@ export class UpdateRoomDto {
   @IsString()
   @IsOptional()
   color?: string;
+
+  @IsString()
+  @IsOptional()
+  photoPath?: string;
 
   @IsInt()
   @Min(0)

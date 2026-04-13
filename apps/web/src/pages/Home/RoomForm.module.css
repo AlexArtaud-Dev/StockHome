@@ -1,0 +1,116 @@
+/* ── Photo upload ────────────────────────────────────────────────── */
+.photoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.photoPreview {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.photoImg {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 1.5px solid var(--color-border);
+}
+
+.photoRemove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-danger);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.photoUploadBtn {
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
+  min-height: var(--touch-min);
+}
+
+.photoUploadBtn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: rgba(99, 102, 241, 0.04);
+}
+
+/* ── Emoji picker ────────────────────────────────────────────────── */
+.emojiRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.emojiBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-elevated);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  min-height: var(--touch-min);
+}
+
+.emojiBtn:hover {
+  border-color: var(--color-primary);
+  background-color: rgba(99, 102, 241, 0.04);
+}
+
+.emojiBtnActive {
+  border-color: var(--color-primary);
+  background-color: rgba(99, 102, 241, 0.06);
+}
+
+.emojiDisplay {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.emojiBtnLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.emojiClear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.emojiClear:hover {
+  background-color: var(--color-bg-sunken);
+  color: var(--color-danger);
+}
+
+.pickerWrapper {
+  margin-top: var(--space-2);
+  /* Let the picker render at its natural size — no overflow clipping */
+}

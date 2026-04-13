@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { useHousehold } from '../../context/HouseholdContext';
 import { ApiError } from '../../services/api';
 import styles from './Auth.module.css';
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const { login } = useAuth();
+  const { refreshHouseholds } = useHousehold();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,10 +21,15 @@ export function LoginPage() {
     setError(null);
     setIsLoading(true);
     try {
-      await login({ username, password });
+      await login({ email, password });
+      await refreshHouseholds();
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Login failed');
+      if (err instanceof ApiError && err.message === 'EMAIL_NOT_VERIFIED') {
+        setError(t('auth.emailNotVerifiedMessage'));
+      } else {
+        setError(err instanceof ApiError ? err.message : t('common.error'));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -30,25 +39,26 @@ export function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <h1 className={styles.title}>StockHome</h1>
-        <p className={styles.subtitle}>Sign in to your household</p>
+        <p className={styles.subtitle}>{t('auth.loginSubtitle')}</p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.field}>
-            <label htmlFor="username">Username</label>
+            <label htmlFor="email">{t('auth.email')}</label>
             <input
-              id="username"
-              type="text"
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder={t('auth.emailPlaceholder')}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">{t('auth.password')}</label>
             <input
               id="password"
               type="password"
@@ -60,13 +70,13 @@ export function LoginPage() {
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-            {isLoading ? 'Signing in…' : 'Sign in'}
+            {isLoading ? t('auth.signingIn') : t('auth.signIn')}
           </button>
         </form>
 
         <p className={styles.switchLink}>
-          No account?{' '}
-          <Link to="/auth/register">Create one</Link>
+          {t('auth.noAccount')}{' '}
+          <Link to="/auth/register">{t('auth.createOne')}</Link>
         </p>
       </div>
     </div>

@@ -1,8 +1,21 @@
 import 'reflect-metadata';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Resolve .env from monorepo root regardless of cwd or launch method
+// dist/main.js lives at apps/api/dist/main.js  → ../../../ = repo root
+// src/main.ts  via ts-node lives at apps/api/src/main.ts → ../../ = repo root
+const envPath = path.resolve(__dirname, '../../../.env');
+const result = dotenv.config({ path: envPath });
+if (result.error) {
+  // Fallback: try two levels up (ts-node) then cwd
+  dotenv.config({ path: path.resolve(__dirname, '../../.env') }) ||
+  dotenv.config();
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as fs from 'fs';
-import * as path from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {

@@ -26,7 +26,7 @@ export class ItemService {
     private readonly roomRepo: Repository<RoomEntity>,
   ) {}
 
-  async findAll(householdId: string, containerId?: string): Promise<Item[]> {
+  async findAll(householdId: string, containerId?: string, roomId?: string): Promise<Item[]> {
     const qb = this.itemRepo
       .createQueryBuilder('i')
       .leftJoinAndSelect('i.categories', 'cat')
@@ -36,6 +36,10 @@ export class ItemService {
 
     if (containerId) {
       qb.andWhere('i.containerId = :containerId', { containerId });
+    }
+
+    if (roomId) {
+      qb.andWhere('i.roomId = :roomId', { roomId });
     }
 
     const items = await qb.orderBy('i.name', 'ASC').getMany();
@@ -146,6 +150,32 @@ export class ItemService {
       newQuantity: item.quantity,
     });
     return this.toDto(item);
+  }
+
+  async duplicate(id: string, householdId: string, userId: string): Promise<Item> {
+    const item = await this.itemRepo.findOne({
+      where: { id, householdId },
+      relations: ['tags', 'stockRule'],
+    });
+    if (!item) throw new NotFoundException('Item not found');
+
+    const tags = item.tags ?? [];
+
+    const copy = this.itemRepo.create({
+      id: uuidv4(),
+      householdId,
+      room: { id: item.roomId },
+      container: item.containerId ? { id: item.containerId } : null,
+      name: `${item.name} (copy)`,
+      description: item.description,
+      quantity: item.quantity,
+      icon: item.icon,
+      isConsumable: item.isConsumable,
+      tags,
+    });
+    await this.itemRepo.save(copy);
+    await this.logMovement(copy.id, userId, 'created', { duplicatedFrom: id });
+    return this.toDto(copy);
   }
 
   async remove(id: string, householdId: string, userId: string): Promise<void> {

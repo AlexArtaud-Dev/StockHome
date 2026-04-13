@@ -1,0 +1,375 @@
+.section {
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-4);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.field input,
+.field select {
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  min-height: var(--touch-min);
+  transition: border-color var(--transition-fast);
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.saveBtn {
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  min-height: var(--touch-min);
+  transition: background-color var(--transition-fast);
+  align-self: flex-start;
+}
+.saveBtn:hover:not(:disabled) { background-color: var(--color-primary-hover); }
+.saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.cancelBtn {
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  min-height: var(--touch-min);
+  background-color: transparent;
+}
+
+.formRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.errorMsg {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+.successMsg {
+  color: var(--color-success, #16a34a);
+  font-size: var(--font-size-sm);
+}
+
+/* Households */
+.householdList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.householdCard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+.householdRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+.householdActions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.inviteBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  background-color: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast);
+}
+.inviteBtn:hover { background-color: rgba(99,102,241,0.08); }
+
+.inviteForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg-sunken);
+}
+
+.inviteInput {
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  min-height: var(--touch-min);
+  transition: border-color var(--transition-fast);
+  width: 100%;
+}
+.inviteInput:focus { outline: none; border-color: var(--color-primary); }
+
+.householdInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.householdName {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.householdMeta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background-color: rgba(99,102,241,0.1);
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.iconBtn {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.iconBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.leaveBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  white-space: nowrap;
+}
+.leaveBtn:hover { background-color: var(--color-danger-bg); }
+
+.deleteHouseholdBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  white-space: nowrap;
+}
+.deleteHouseholdBtn:hover { background-color: var(--color-danger-bg); }
+
+.newHouseholdBtn {
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  background-color: transparent;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.newHouseholdBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.newHouseholdForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* Invitations */
+.invitationList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.invitationRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  gap: var(--space-3);
+}
+
+.inviteFrom {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  flex: 1;
+}
+
+.inviteActions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.acceptBtn {
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.declineBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.emptyText {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-3);
+}
+
+/* Preferences */
+.prefRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.prefRow:last-child { border-bottom: none; }
+
+.prefLabel {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.btnGroup {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.toggleBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-bg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.toggleBtn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.toggleBtn.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 600;
+  background-color: rgba(99,102,241,0.06);
+}
+
+/* Sign out */
+.logoutBtn {
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  min-height: var(--touch-min);
+  width: 100%;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+.logoutBtn:hover { background-color: var(--color-danger); color: white; }
