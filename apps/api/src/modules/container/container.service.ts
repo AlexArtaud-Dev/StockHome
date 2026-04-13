@@ -20,7 +20,7 @@ export class ContainerService {
     private readonly roomRepo: Repository<RoomEntity>,
   ) {}
 
-  async findAll(householdId: string, roomId?: string): Promise<Container[]> {
+  async findAll(householdId: string, roomId?: string, parentContainerId?: string): Promise<Container[]> {
     const queryBuilder = this.containerRepo
       .createQueryBuilder('c')
       .innerJoin('c.room', 'r')
@@ -28,6 +28,12 @@ export class ContainerService {
 
     if (roomId) {
       queryBuilder.andWhere('c.roomId = :roomId', { roomId });
+    }
+
+    if (parentContainerId === 'none') {
+      queryBuilder.andWhere('c.parentContainerId IS NULL');
+    } else if (parentContainerId) {
+      queryBuilder.andWhere('c.parentContainerId = :parentContainerId', { parentContainerId });
     }
 
     const containers = await queryBuilder
@@ -62,7 +68,21 @@ export class ContainerService {
     return this.toDto(container);
   }
 
+  private async getContainerDepth(containerId: string): Promise<number> {
+    let depth = 0;
+    let currentId: string | null = containerId;
+    while (currentId) {
+      const c = await this.containerRepo.findOneBy({ id: currentId });
+      if (!c) break;
+      currentId = c.parentContainerId;
+      depth++;
+    }
+    return depth;
+  }
+
   async create(dto: CreateContainerDto, householdId: string): Promise<Container> {
+    const maxDepth = parseInt(process.env['MAX_CONTAINER_DEPTH'] ?? '3', 10);
+
     const room = await this.roomRepo.findOneBy({
       id: dto.roomId,
       householdId,
@@ -76,6 +96,12 @@ export class ContainerService {
       if (!parent) throw new NotFoundException('Parent container not found');
       if (parent.roomId !== dto.roomId) {
         throw new BadRequestException('Parent container must be in the same room');
+      }
+      const parentDepth = await this.getContainerDepth(dto.parentContainerId);
+      if (parentDepth >= maxDepth) {
+        throw new BadRequestException(
+          `Maximum container nesting depth of ${maxDepth} reached`,
+        );
       }
     }
 

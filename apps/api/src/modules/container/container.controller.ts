@@ -25,8 +25,9 @@ export class ContainerController {
   findAll(
     @CurrentUser() user: JwtPayload,
     @Query('roomId') roomId?: string,
+    @Query('parentContainerId') parentContainerId?: string,
   ) {
-    return this.containerService.findAll(user.householdId, roomId);
+    return this.containerService.findAll(user.householdId, roomId, parentContainerId);
   }
 
   @Get('by-qr/:qrCode')

@@ -1,23 +1,17 @@
-.addBtn {
+.iconBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--touch-min);
-  height: var(--touch-min);
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
-  color: var(--color-text);
-  background-color: var(--color-bg-sunken);
-  transition: background-color var(--transition-fast);
-}
-
-.addBtn:hover { background-color: var(--color-border); }
-
-.loading, .errorMsg {
-  text-align: center;
-  padding: var(--space-8);
   color: var(--color-text-muted);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
-.errorMsg { color: var(--color-danger); }
+.iconBtn:hover { background-color: var(--color-bg-hover); color: var(--color-text); }
+
+.loading { color: var(--color-text-muted); padding: var(--space-8); text-align: center; }
+.errorMsg { color: var(--color-danger); padding: var(--space-4); text-align: center; }
 
 .empty {
   text-align: center;
@@ -28,45 +22,68 @@
   align-items: center;
   gap: var(--space-3);
 }
-.emptyLink { color: var(--color-primary); font-weight: 500; }
+.emptyLink { color: var(--color-primary); font-weight: 600; }
 
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+/* ── Grid layout ────────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
 }
 
-.containerCard {
+@media (min-width: 640px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Container card ─────────────────────────────────────────────────── */
+.card {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-3);
   background-color: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  min-height: var(--touch-min);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-fast);
-}
-.containerCard:hover { box-shadow: var(--shadow-md); }
-
-.containerIcon { font-size: 1.5rem; flex-shrink: 0; }
-
-.containerInfo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+  text-decoration: none;
+  color: var(--color-text);
   overflow: hidden;
 }
 
-.containerName {
-  font-weight: 600;
+.card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.cardIcon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.cardName {
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.containerDesc {
+.cardDesc {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   overflow: hidden;
@@ -74,42 +91,32 @@
   white-space: nowrap;
 }
 
-.iconBtn {
+.cardFooter {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: var(--touch-min);
-  height: var(--touch-min);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  background-color: var(--color-bg-sunken);
-  transition: background-color var(--transition-fast);
-}
-.iconBtn:hover { background-color: var(--color-border); }
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  justify-content: space-between;
+  margin-top: var(--space-1);
 }
 
-.row .containerCard {
-  flex: 1;
-  border-radius: var(--radius-lg);
+.cardType {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-subtle);
+  text-transform: capitalize;
 }
 
 .editBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--touch-min);
-  height: var(--touch-min);
+  width: 30px;
+  height: 30px;
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
-  flex-shrink: 0;
   transition: background-color var(--transition-fast), color var(--transition-fast);
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 1;
 }
-.editBtn:hover {
-  background-color: var(--color-bg-sunken);
-  color: var(--color-text);
-}
+.editBtn:hover { background-color: var(--color-bg-hover); color: var(--color-text); }

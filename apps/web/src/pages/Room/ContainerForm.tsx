@@ -15,11 +15,12 @@ const CONTAINER_TYPES: { value: ContainerType; label: string }[] = [
 interface Props {
   roomId: string;
   container?: Container;
+  parentContainerId?: string;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function ContainerForm({ roomId, container, onClose, onSaved }: Props) {
+export function ContainerForm({ roomId, container, parentContainerId, onClose, onSaved }: Props) {
   const isEdit = Boolean(container);
   const [name, setName] = useState(container?.name ?? '');
   const [type, setType] = useState<ContainerType>(container?.type ?? 'box');
@@ -42,6 +43,7 @@ export function ContainerForm({ roomId, container, onClose, onSaved }: Props) {
       } else {
         await api.post('/containers', {
           roomId,
+          parentContainerId: parentContainerId ?? null,
           name,
           type,
           description: description || null,
@@ -70,8 +72,14 @@ export function ContainerForm({ roomId, container, onClose, onSaved }: Props) {
     }
   }
 
+  const title = isEdit
+    ? 'Edit container'
+    : parentContainerId
+    ? 'Add sub-container'
+    : 'New container';
+
   return (
-    <Modal title={isEdit ? 'Edit container' : 'New container'} onClose={onClose}>
+    <Modal title={title} onClose={onClose}>
       <form className={formStyles.form} onSubmit={handleSubmit}>
         {error && <div className={formStyles.error}>{error}</div>}
 
@@ -82,7 +90,7 @@ export function ContainerForm({ roomId, container, onClose, onSaved }: Props) {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Winter clothes, Power tools…"
+            placeholder={parentContainerId ? 'e.g. Shelf A, Compartment 1…' : 'e.g. Winter clothes, Power tools…'}
             autoFocus
             required
           />
@@ -102,12 +110,12 @@ export function ContainerForm({ roomId, container, onClose, onSaved }: Props) {
         </div>
 
         <div className={formStyles.field}>
-          <label htmlFor="containerDesc">Description (optional)</label>
+          <label htmlFor="containerDesc">Description <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></label>
           <textarea
             id="containerDesc"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="What's in here…"
+            placeholder="What's stored here…"
           />
         </div>
 
@@ -123,7 +131,7 @@ export function ContainerForm({ roomId, container, onClose, onSaved }: Props) {
             </button>
           )}
           <button type="submit" className={formStyles.submitBtn} disabled={isSaving}>
-            {isSaving ? 'Saving…' : isEdit ? 'Save changes' : 'Create container'}
+            {isSaving ? 'Saving…' : isEdit ? 'Save changes' : 'Create'}
           </button>
         </div>
       </form>

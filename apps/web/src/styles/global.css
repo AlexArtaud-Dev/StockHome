@@ -4,10 +4,13 @@
 body {
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
   background-color: var(--color-bg);
   color: var(--color-text);
   min-height: 100dvh;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -16,25 +19,17 @@ body {
   flex-direction: column;
 }
 
-h1 { font-size: var(--font-size-2xl); font-weight: 700; }
-h2 { font-size: var(--font-size-xl); font-weight: 600; }
-h3 { font-size: var(--font-size-lg); font-weight: 600; }
+h1 { font-size: var(--font-size-2xl); font-weight: 700; line-height: var(--line-height-tight); letter-spacing: -0.02em; }
+h2 { font-size: var(--font-size-xl); font-weight: 600; line-height: var(--line-height-tight); letter-spacing: -0.01em; }
+h3 { font-size: var(--font-size-lg); font-weight: 600; line-height: var(--line-height-tight); }
 
-/* Focus visible styles */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-bg-sunken);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-subtle); }

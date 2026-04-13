@@ -19,6 +19,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
   const [description, setDescription] = useState(item?.description ?? '');
   const [quantity, setQuantity] = useState(String(item?.quantity ?? 1));
   const [isConsumable, setIsConsumable] = useState(item?.isConsumable ?? false);
+  const [minQuantity, setMinQuantity] = useState(String(item?.stockRule?.minQuantity ?? ''));
   const [tags, setTags] = useState<string[]>(item?.tags?.map((t) => t.name) ?? []);
   const [tagInput, setTagInput] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,19 +29,13 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
 
   function addTag(raw: string) {
     const val = raw.trim();
-    if (val && !tags.includes(val)) {
-      setTags((prev) => [...prev, val]);
-    }
+    if (val && !tags.includes(val)) setTags((prev) => [...prev, val]);
     setTagInput('');
   }
 
   function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addTag(tagInput);
-    } else if (e.key === 'Backspace' && tagInput === '' && tags.length > 0) {
-      setTags((prev) => prev.slice(0, -1));
-    }
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(tagInput); }
+    else if (e.key === 'Backspace' && tagInput === '' && tags.length > 0) setTags((prev) => prev.slice(0, -1));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -49,6 +44,8 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
     setError(null);
     setIsSaving(true);
     try {
+      let savedId: string;
+
       if (isEdit && item) {
         await api.patch(`/items/${item.id}`, {
           name,
@@ -58,8 +55,9 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
           tagNames: tags,
           containerId,
         });
+        savedId = item.id;
       } else {
-        await api.post('/items', {
+        const created = await api.post<Item>('/items', {
           name,
           description: description || null,
           quantity: parseInt(quantity, 10) || 1,
@@ -68,7 +66,17 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
           containerId,
           roomId,
         });
+        savedId = created.id;
       }
+
+      // Upsert stock rule when consumable with a minQuantity
+      if (isConsumable && minQuantity !== '') {
+        const min = parseInt(minQuantity, 10);
+        if (!isNaN(min) && min >= 0) {
+          await api.put(`/items/${savedId}/stock-rule`, { minQuantity: min });
+        }
+      }
+
       onSaved();
       onClose();
     } catch (err) {
@@ -111,7 +119,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
         </div>
 
         <div className={formStyles.field}>
-          <label htmlFor="itemDesc">Description (optional)</label>
+          <label htmlFor="itemDesc">Description <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></label>
           <textarea
             id="itemDesc"
             value={description}
@@ -144,9 +152,9 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
                   className={formStyles.tagRemove}
                   onClick={() => setTags((prev) => prev.filter((t) => t !== tag))}
                   role="button"
-                  aria-label={`Remove tag ${tag}`}
+                  aria-label={`Remove ${tag}`}
                 >
-                  <X size={12} />
+                  <X size={11} />
                 </span>
               </span>
             ))}
@@ -160,17 +168,45 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
               placeholder={tags.length === 0 ? 'Add tags…' : ''}
             />
           </div>
+          <span className={formStyles.hint}>Press Enter or comma to add a tag</span>
         </div>
 
-        <div className={`${formStyles.field} ${formStyles.checkRow}`}>
+        {/* Consumable toggle */}
+        <div
+          className={formStyles.checkRow}
+          onClick={() => setIsConsumable((v) => !v)}
+        >
           <input
             id="isConsumable"
             type="checkbox"
             checked={isConsumable}
             onChange={(e) => setIsConsumable(e.target.checked)}
+            onClick={(e) => e.stopPropagation()}
           />
-          <label htmlFor="isConsumable">Consumable (track stock level)</label>
+          <label htmlFor="isConsumable" onClick={(e) => e.stopPropagation()}>
+            Consumable — track stock level
+          </label>
         </div>
+
+        {/* Minimum stock — shown only when consumable */}
+        {isConsumable && (
+          <div className={formStyles.subSection}>
+            <div className={formStyles.field}>
+              <label htmlFor="minQty">Minimum stock</label>
+              <input
+                id="minQty"
+                type="number"
+                min="0"
+                value={minQuantity}
+                onChange={(e) => setMinQuantity(e.target.value)}
+                placeholder="e.g. 2"
+              />
+              <span className={formStyles.hint}>
+                Item appears in Shop when quantity drops below this value.
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className={formStyles.actions}>
           {isEdit && (

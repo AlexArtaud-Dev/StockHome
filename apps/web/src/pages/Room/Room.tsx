@@ -10,11 +10,7 @@ import { RoomForm } from '../Home/RoomForm';
 import styles from './Room.module.css';
 
 const CONTAINER_TYPE_ICONS: Record<string, string> = {
-  box: '📦',
-  shelf: '🗄️',
-  drawer: '🗂️',
-  bag: '👜',
-  other: '📁',
+  box: '📦', shelf: '🗄️', drawer: '🗂️', bag: '👜', other: '📁',
 };
 
 export function RoomPage() {
@@ -29,7 +25,7 @@ export function RoomPage() {
   );
 
   const { data: containers, isLoading, error, refetch } = useApi<Container[]>(
-    (signal) => api.get(`/containers?roomId=${id!}`, signal),
+    (signal) => api.get(`/containers?roomId=${id!}&parentContainerId=none`, signal),
     [id],
   );
 
@@ -39,18 +35,10 @@ export function RoomPage() {
       showBack
       actions={
         <>
-          <button
-            className={styles.iconBtn}
-            onClick={() => setShowEditRoom(true)}
-            aria-label="Edit room"
-          >
+          <button className={styles.iconBtn} onClick={() => setShowEditRoom(true)} aria-label="Edit room">
             <Edit2 size={18} />
           </button>
-          <button
-            className={styles.iconBtn}
-            onClick={() => setShowCreateContainer(true)}
-            aria-label="Add container"
-          >
+          <button className={styles.iconBtn} onClick={() => setShowCreateContainer(true)} aria-label="Add container">
             <Plus size={20} />
           </button>
         </>
@@ -68,37 +56,36 @@ export function RoomPage() {
         </div>
       )}
 
-      <div className={styles.list}>
+      <div className={styles.grid}>
         {containers?.map((container) => (
-          <div key={container.id} className={styles.row}>
-            <Link to={`/containers/${container.id}`} className={styles.containerCard}>
-              <span className={styles.containerIcon}>
+          <div key={container.id} style={{ position: 'relative' }}>
+            <Link to={`/containers/${container.id}`} className={styles.card}>
+              <span className={styles.cardIcon}>
                 {CONTAINER_TYPE_ICONS[container.type] ?? '📁'}
               </span>
-              <div className={styles.containerInfo}>
-                <span className={styles.containerName}>{container.name}</span>
+              <div className={styles.cardBody}>
+                <span className={styles.cardName}>{container.name}</span>
                 {container.description && (
-                  <span className={styles.containerDesc}>{container.description}</span>
+                  <span className={styles.cardDesc}>{container.description}</span>
                 )}
+              </div>
+              <div className={styles.cardFooter}>
+                <span className={styles.cardType}>{container.type}</span>
               </div>
             </Link>
             <button
               className={styles.editBtn}
-              onClick={() => setEditContainer(container)}
+              onClick={(e) => { e.preventDefault(); setEditContainer(container); }}
               aria-label={`Edit ${container.name}`}
             >
-              <Edit2 size={16} />
+              <Edit2 size={14} />
             </button>
           </div>
         ))}
       </div>
 
       {showCreateContainer && id && (
-        <ContainerForm
-          roomId={id}
-          onClose={() => setShowCreateContainer(false)}
-          onSaved={refetch}
-        />
+        <ContainerForm roomId={id} onClose={() => setShowCreateContainer(false)} onSaved={refetch} />
       )}
       {editContainer && id && (
         <ContainerForm
