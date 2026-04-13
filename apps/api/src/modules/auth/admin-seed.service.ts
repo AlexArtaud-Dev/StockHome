@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { UserEntity } from '../../database/entities/user.entity';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AdminSeedService implements OnApplicationBootstrap {
@@ -12,6 +13,7 @@ export class AdminSeedService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    private readonly emailService: EmailService,
   ) {}
 
   private generatePassword(): string {
@@ -48,6 +50,7 @@ export class AdminSeedService implements OnApplicationBootstrap {
         this.logger.log(`  Password: ${password}`);
         this.logger.log('Set FIRST_LAUNCH=false after logging in!');
         this.logger.log('='.repeat(60));
+        await this.emailService.sendAdminPasswordEmail(adminEmail, password, true);
       } else {
         // Just ensure admin flag is set
         if (!existing.isAdmin) {
@@ -83,5 +86,6 @@ export class AdminSeedService implements OnApplicationBootstrap {
     this.logger.log(`  Password: ${password}`);
     this.logger.log('Set FIRST_LAUNCH=false after logging in!');
     this.logger.log('='.repeat(60));
+    await this.emailService.sendAdminPasswordEmail(adminEmail, password, false);
   }
 }
