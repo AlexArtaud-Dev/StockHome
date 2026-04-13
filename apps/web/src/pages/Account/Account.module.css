@@ -114,15 +114,62 @@
   margin-bottom: var(--space-3);
 }
 
+.householdCard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
 .householdRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3);
-  border: 1px solid var(--color-border);
+  gap: var(--space-2);
+}
+
+.householdActions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.inviteBtn {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  background-color: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast);
+}
+.inviteBtn:hover { background-color: rgba(99,102,241,0.08); }
+
+.inviteForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg-sunken);
+}
+
+.inviteInput {
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  min-height: var(--touch-min);
+  transition: border-color var(--transition-fast);
+  width: 100%;
 }
+.inviteInput:focus { outline: none; border-color: var(--color-primary); }
 
 .householdInfo {
   display: flex;

@@ -34,6 +34,12 @@ export function AccountPage() {
   const [newHouseholdName, setNewHouseholdName] = useState('');
   const [newHouseholdType, setNewHouseholdType] = useState<Household['type']>('other');
 
+  // Invite form state per household
+  const [inviteOpenId, setInviteOpenId] = useState<string | null>(null);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteStatus, setInviteStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
   useEffect(() => {
     api.get<HouseholdInvitation[]>('/invitations/pending')
       .then((inv) => setPendingInvitations(inv))
@@ -88,6 +94,27 @@ export function AccountPage() {
       await refreshHouseholds();
     } catch {
       // ignore
+    }
+  }
+
+  function openInvite(householdId: string) {
+    setInviteOpenId(householdId);
+    setInviteEmail('');
+    setInviteStatus('idle');
+    setInviteError(null);
+  }
+
+  async function handleSendInvite(e: React.FormEvent, householdId: string) {
+    e.preventDefault();
+    setInviteStatus('sending');
+    setInviteError(null);
+    try {
+      await api.post(`/households/${householdId}/invite`, { email: inviteEmail });
+      setInviteStatus('sent');
+      setInviteEmail('');
+    } catch (err) {
+      setInviteStatus('error');
+      setInviteError(err instanceof ApiError ? err.message : t('common.error'));
     }
   }
 
@@ -229,24 +256,58 @@ export function AccountPage() {
         )}
         <div className={styles.householdList}>
           {households.map((h) => (
-            <div key={h.id} className={styles.householdRow}>
-              <div className={styles.householdInfo}>
-                <span className={styles.householdName}>{h.name}</span>
-                <span className={styles.householdMeta}>
-                  {t(`household.types.${h.type}`)}
-                  {' · '}
-                  <span className={styles.badge}>
-                    {h.isOwner ? t('account.ownerBadge') : t('account.memberBadge')}
+            <div key={h.id} className={styles.householdCard}>
+              <div className={styles.householdRow}>
+                <div className={styles.householdInfo}>
+                  <span className={styles.householdName}>{h.name}</span>
+                  <span className={styles.householdMeta}>
+                    {t(`household.types.${h.type}`)}
+                    {' · '}
+                    <span className={styles.badge}>
+                      {h.isOwner ? t('account.ownerBadge') : t('account.memberBadge')}
+                    </span>
                   </span>
-                </span>
+                </div>
+                <div className={styles.householdActions}>
+                  {h.isOwner && (
+                    <button
+                      className={styles.inviteBtn}
+                      onClick={() => inviteOpenId === h.id ? setInviteOpenId(null) : openInvite(h.id)}
+                    >
+                      {t('household.inviteMember')}
+                    </button>
+                  )}
+                  {!h.isOwner && (
+                    <button className={styles.leaveBtn} onClick={() => handleLeave(h.id)}>
+                      {t('account.leaveHousehold')}
+                    </button>
+                  )}
+                </div>
               </div>
-              {!h.isOwner && (
-                <button
-                  className={styles.leaveBtn}
-                  onClick={() => handleLeave(h.id)}
-                >
-                  {t('account.leaveHousehold')}
-                </button>
+
+              {/* Inline invite form */}
+              {inviteOpenId === h.id && (
+                <form className={styles.inviteForm} onSubmit={(e) => handleSendInvite(e, h.id)}>
+                  <input
+                    type="email"
+                    className={styles.inviteInput}
+                    placeholder={t('household.inviteEmailPlaceholder')}
+                    value={inviteEmail}
+                    onChange={(e) => { setInviteEmail(e.target.value); setInviteStatus('idle'); }}
+                    autoFocus
+                    required
+                  />
+                  <div className={styles.formRow}>
+                    <button type="submit" className={styles.saveBtn} disabled={inviteStatus === 'sending'}>
+                      {inviteStatus === 'sending' ? t('household.sending') : t('household.sendInvite')}
+                    </button>
+                    <button type="button" className={styles.cancelBtn} onClick={() => setInviteOpenId(null)}>
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                  {inviteStatus === 'sent' && <p className={styles.successMsg}>{t('household.inviteSent')}</p>}
+                  {inviteStatus === 'error' && <p className={styles.errorMsg}>{inviteError}</p>}
+                </form>
               )}
             </div>
           ))}
