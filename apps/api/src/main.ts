@@ -6,12 +6,22 @@ import * as path from 'path';
 const envCandidates = [
   path.resolve(__dirname, '../../../.env'),   // dist/main.js → monorepo root
   path.resolve(__dirname, '../../.env'),      // src/main.ts  → monorepo root (ts-node)
+  path.resolve(__dirname, '../.env'),         // one level up from dist/
   path.resolve(process.cwd(), '.env'),        // wherever npm is invoked from
 ];
+console.log(`[dotenv] cwd=${process.cwd()} __dirname=${__dirname}`);
+let loaded = false;
 for (const p of envCandidates) {
   const result = dotenv.config({ path: p });
-  if (!result.error) { console.log(`[dotenv] Loaded ${p}`); break; }
+  if (!result.error) {
+    console.log(`[dotenv] Loaded ${p}`);
+    loaded = true;
+    break;
+  } else {
+    console.log(`[dotenv] Not found: ${p}`);
+  }
 }
+if (!loaded) console.warn('[dotenv] No .env file found in any candidate path');
 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
