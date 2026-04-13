@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Fts5Service } from './fts5.service';
 import { HouseholdEntity } from './entities/household.entity';
+import { HouseholdMemberEntity } from './entities/household-member.entity';
+import { HouseholdInvitationEntity } from './entities/household-invitation.entity';
 import { UserEntity } from './entities/user.entity';
 import { RoomEntity } from './entities/room.entity';
 import { ContainerEntity } from './entities/container.entity';
@@ -19,6 +21,8 @@ import { MovementLogEntity } from './entities/movement-log.entity';
         database: process.env['DB_PATH'] ?? './data/stockhome.db',
         entities: [
           HouseholdEntity,
+          HouseholdMemberEntity,
+          HouseholdInvitationEntity,
           UserEntity,
           RoomEntity,
           ContainerEntity,

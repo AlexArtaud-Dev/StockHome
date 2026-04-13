@@ -9,20 +9,69 @@ export type MovementAction =
   | 'deleted'
   | 'quantity_changed';
 
+export type HouseholdType =
+  | 'house'
+  | 'flat'
+  | 'apartment'
+  | 'studio'
+  | 'garage'
+  | 'office'
+  | 'storage'
+  | 'other';
+
 // ─── Entities ────────────────────────────────────────────────────────────────
 
 export interface Household {
   id: string;
   name: string;
+  type: HouseholdType;
+  ownerId: string | null;
+  isOwner: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface User {
   id: string;
-  householdId: string;
+  email: string | null;
   username: string;
+  firstName: string | null;
+  lastName: string | null;
   displayName: string | null;
+  isAdmin: boolean;
+  isEmailVerified: boolean;
+  createdAt: string;
+}
+
+export interface HouseholdMember {
+  id: string;
+  username: string;
+  firstName: string | null;
+  lastName: string | null;
+  displayName: string | null;
+  email: string | null;
+  joinedAt: string;
+  isOwner: boolean;
+}
+
+export interface HouseholdInvitation {
+  id: string;
+  householdId: string;
+  householdName: string;
+  inviterName: string;
+  createdAt: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string | null;
+  username: string;
+  firstName: string | null;
+  lastName: string | null;
+  displayName: string | null;
+  isAdmin: boolean;
+  isEmailVerified: boolean;
+  isBanned: boolean;
   createdAt: string;
 }
 
@@ -126,15 +175,15 @@ export interface PaginatedResponse<T> {
 
 // Auth
 export interface LoginDto {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterDto {
-  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
   password: string;
-  displayName?: string;
-  householdName: string;
 }
 
 export interface AuthTokens {

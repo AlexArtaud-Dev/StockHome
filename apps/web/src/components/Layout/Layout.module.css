@@ -69,6 +69,77 @@
 
 .scanBtn:active { transform: scale(0.94); }
 
+/* ── Household selector (desktop only) ────────────────────────────── */
+.householdSelector {
+  display: none;
+  position: relative;
+  margin-bottom: var(--space-2);
+}
+
+.householdBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-sunken);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  gap: var(--space-2);
+  transition: border-color var(--transition-fast);
+}
+.householdBtn:hover { border-color: var(--color-primary); }
+
+.householdName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  flex: 1;
+  text-align: left;
+}
+
+.householdDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.householdOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background-color: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--transition-fast);
+}
+.householdOption:hover { background-color: var(--color-bg-sunken); }
+.householdOptionActive { color: var(--color-primary); font-weight: 600; }
+
+.householdBadge {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Mobile: hide scan button label */
+.scanBtnLabel { display: none; }
+
 /* ── Main wrapper ──────────────────────────────────────────────────── */
 .mainArea {
   display: flex;
@@ -165,11 +236,16 @@
     align-items: center;
     gap: var(--space-3);
     padding: var(--space-2) var(--space-3);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-2);
     color: var(--color-text);
     font-size: var(--font-size-lg);
     font-weight: 700;
     letter-spacing: -0.02em;
+  }
+
+  .householdSelector {
+    display: block;
+    margin-bottom: var(--space-3);
   }
 
   .navItem {
@@ -201,8 +277,8 @@
     box-shadow: none;
   }
 
-  .scanBtn::after {
-    content: 'Scan QR';
+  .scanBtnLabel {
+    display: inline;
   }
 
   .scanBtn:hover { transform: none; box-shadow: none; filter: brightness(1.1); }

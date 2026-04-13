@@ -16,11 +16,18 @@ class ApiError extends Error {
   }
 }
 
+function getHouseholdHeaders(): Record<string, string> {
+  const householdId = localStorage.getItem('selectedHouseholdId');
+  if (householdId) return { 'X-Household-Id': householdId };
+  return {};
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, signal } = options;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    ...getHouseholdHeaders(),
   };
 
   const token = localStorage.getItem('accessToken');
@@ -55,6 +62,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     } else {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('selectedHouseholdId');
       window.location.href = '/auth/login';
       throw new ApiError(401, 'Session expired');
     }
@@ -94,7 +102,9 @@ async function tryRefreshToken(): Promise<boolean> {
 }
 
 async function requestForm<T>(path: string, formData: FormData): Promise<T> {
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = {
+    ...getHouseholdHeaders(),
+  };
   const token = localStorage.getItem('accessToken');
   if (token) headers['Authorization'] = `Bearer ${token}`;
 

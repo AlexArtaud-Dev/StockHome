@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useReducer,
 } from 'react';
-import { User, AuthResponse, LoginDto, RegisterDto } from '@stockhome/shared';
+import { User } from '@stockhome/shared';
 import { api } from '../services/api';
 
 interface AuthState {
@@ -32,13 +32,26 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
   }
 }
 
+interface LoginDto {
+  email: string;
+  password: string;
+}
+
+interface RegisterDto {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}
+
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (dto: LoginDto) => Promise<void>;
-  register: (dto: RegisterDto) => Promise<void>;
+  register: (dto: RegisterDto) => Promise<{ message: string }>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -67,28 +80,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async (dto: LoginDto) => {
-    const response = await api.post<AuthResponse>('/auth/login', dto);
+    const response = await api.post<{ tokens: { accessToken: string; refreshToken: string }; user: User }>(
+      '/auth/login',
+      dto,
+    );
     localStorage.setItem('accessToken', response.tokens.accessToken);
     localStorage.setItem('refreshToken', response.tokens.refreshToken);
     dispatch({ type: 'SET_USER', user: response.user });
   }, []);
 
-  const register = useCallback(async (dto: RegisterDto) => {
-    const response = await api.post<AuthResponse>('/auth/register', dto);
-    localStorage.setItem('accessToken', response.tokens.accessToken);
-    localStorage.setItem('refreshToken', response.tokens.refreshToken);
-    dispatch({ type: 'SET_USER', user: response.user });
+  const register = useCallback(async (dto: RegisterDto): Promise<{ message: string }> => {
+    return api.post<{ message: string }>('/auth/register', dto);
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('selectedHouseholdId');
     dispatch({ type: 'CLEAR_USER' });
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const user = await api.get<User>('/users/me');
+      dispatch({ type: 'SET_USER', user });
+    } catch {
+      // ignore
+    }
   }, []);
 
   return (
     <AuthContext.Provider
-      value={{ ...state, login, register, logout }}
+      value={{ ...state, login, register, logout, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

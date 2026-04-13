@@ -10,10 +10,10 @@ export function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    username: '',
+    email: '',
+    firstName: '',
+    lastName: '',
     password: '',
-    displayName: '',
-    householdName: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,12 +28,12 @@ export function RegisterPage() {
     setIsLoading(true);
     try {
       await register({
-        username: form.username,
+        email: form.email,
+        firstName: form.firstName,
+        lastName: form.lastName,
         password: form.password,
-        displayName: form.displayName || undefined,
-        householdName: form.householdName,
       });
-      navigate('/');
+      navigate(`/auth/verify-email?email=${encodeURIComponent(form.email)}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('common.error'));
     } finally {
@@ -50,39 +50,44 @@ export function RegisterPage() {
         <form className={styles.form} onSubmit={handleSubmit}>
           {error && <div className={styles.error}>{error}</div>}
 
-          <div className={styles.field}>
-            <label htmlFor="householdName">Household name</label>
-            <input
-              id="householdName"
-              name="householdName"
-              type="text"
-              value={form.householdName}
-              onChange={handleChange}
-              placeholder="e.g. Smith Family"
-              required
-            />
+          <div className={styles.fieldRow}>
+            <div className={styles.field}>
+              <label htmlFor="firstName">{t('auth.firstName')}</label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                autoComplete="given-name"
+                placeholder={t('auth.firstNamePlaceholder')}
+                value={form.firstName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="lastName">{t('auth.lastName')}</label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                autoComplete="family-name"
+                placeholder={t('auth.lastNamePlaceholder')}
+                value={form.lastName}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="displayName">Your name {t('common.optional')}</label>
+            <label htmlFor="email">{t('auth.email')}</label>
             <input
-              id="displayName"
-              name="displayName"
-              type="text"
-              value={form.displayName}
-              onChange={handleChange}
-              placeholder="e.g. Alex"
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="username">{t('auth.email')}</label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              value={form.username}
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder={t('auth.emailPlaceholder')}
+              value={form.email}
               onChange={handleChange}
               required
             />

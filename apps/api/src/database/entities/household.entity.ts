@@ -6,8 +6,17 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
 import { RoomEntity } from './room.entity';
+
+export type HouseholdType =
+  | 'house'
+  | 'flat'
+  | 'apartment'
+  | 'studio'
+  | 'garage'
+  | 'office'
+  | 'storage'
+  | 'other';
 
 @Entity('household')
 export class HouseholdEntity {
@@ -17,14 +26,17 @@ export class HouseholdEntity {
   @Column({ type: 'text' })
   name!: string;
 
+  @Column({ type: 'text', nullable: true })
+  ownerId!: string | null;
+
+  @Column({ type: 'text', default: 'other' })
+  type!: HouseholdType;
+
   @CreateDateColumn()
   createdAt!: Date;
 
   @UpdateDateColumn()
   updatedAt!: Date;
-
-  @OneToMany(() => UserEntity, (user) => user.household)
-  users!: UserEntity[];
 
   @OneToMany(() => RoomEntity, (room) => room.household)
   rooms!: RoomEntity[];
