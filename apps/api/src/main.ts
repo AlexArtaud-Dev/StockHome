@@ -2,26 +2,16 @@ import 'reflect-metadata';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-// Try several candidate locations for .env (monorepo root, api root, cwd)
-const envCandidates = [
-  path.resolve(__dirname, '../../../.env'),   // dist/main.js → monorepo root
-  path.resolve(__dirname, '../../.env'),      // src/main.ts  → monorepo root (ts-node)
-  path.resolve(__dirname, '../.env'),         // one level up from dist/
-  path.resolve(process.cwd(), '.env'),        // wherever npm is invoked from
-];
-console.log(`[dotenv] cwd=${process.cwd()} __dirname=${__dirname}`);
-let loaded = false;
-for (const p of envCandidates) {
-  const result = dotenv.config({ path: p });
-  if (!result.error) {
-    console.log(`[dotenv] Loaded ${p}`);
-    loaded = true;
-    break;
-  } else {
-    console.log(`[dotenv] Not found: ${p}`);
-  }
+// Resolve .env from monorepo root regardless of cwd or launch method
+// dist/main.js lives at apps/api/dist/main.js  → ../../../ = repo root
+// src/main.ts  via ts-node lives at apps/api/src/main.ts → ../../ = repo root
+const envPath = path.resolve(__dirname, '../../../.env');
+const result = dotenv.config({ path: envPath });
+if (result.error) {
+  // Fallback: try two levels up (ts-node) then cwd
+  dotenv.config({ path: path.resolve(__dirname, '../../.env') }) ||
+  dotenv.config();
 }
-if (!loaded) console.warn('[dotenv] No .env file found in any candidate path');
 
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';

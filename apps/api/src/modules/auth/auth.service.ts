@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -17,6 +18,8 @@ import { AuthTokens } from '@stockhome/shared';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
@@ -114,7 +117,9 @@ export class AuthService {
   }
 
   async verifyEmail(dto: VerifyEmailDto): Promise<{ message: string }> {
+    this.logger.debug(`Verifying token: "${dto.token}"`);
     const user = await this.userRepo.findOneBy({ emailVerificationToken: dto.token });
+    this.logger.debug(`Token lookup result: ${user ? user.email : 'NOT FOUND'}`);
     if (!user) {
       throw new BadRequestException('Invalid or expired verification token');
     }
