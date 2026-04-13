@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CreatableSelect from 'react-select/creatable';
 import { Modal } from '../../components/Modal/Modal';
 import { api, ApiError } from '../../services/api';
@@ -85,6 +86,7 @@ const selectStyles = {
 };
 
 export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props) {
+  const { t } = useTranslation();
   const isEdit = Boolean(item);
   const [name, setName] = useState(item?.name ?? '');
   const [description, setDescription] = useState(item?.description ?? '');
@@ -92,7 +94,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
   const [isConsumable, setIsConsumable] = useState(item?.isConsumable ?? false);
   const [minQuantity, setMinQuantity] = useState(String(item?.stockRule?.minQuantity ?? ''));
   const [tags, setTags] = useState<TagOption[]>(
-    item?.tags?.map((t) => ({ label: t.name, value: t.name })) ?? [],
+    item?.tags?.map((tag) => ({ label: tag.name, value: tag.name })) ?? [],
   );
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -108,7 +110,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
 
       const parsedQty = parseInt(quantity, 10);
       const safeQty = Number.isNaN(parsedQty) ? 1 : Math.max(0, parsedQty);
-      const tagNames = tags.map((t) => t.value);
+      const tagNames = tags.map((tag) => tag.value);
 
       if (isEdit && item) {
         await api.patch(`/items/${item.id}`, {
@@ -143,7 +145,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to save item');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
     } finally {
       setIsSaving(false);
     }
@@ -151,14 +153,14 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
 
   async function handleDelete() {
     if (!item) return;
-    if (!window.confirm(`Delete "${item.name}"?`)) return;
+    if (!window.confirm(t('itemForm.confirmDelete', { name: item.name }))) return;
     setIsDeleting(true);
     try {
       await api.delete(`/items/${item.id}`);
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to delete item');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
       setIsDeleting(false);
     }
   }
@@ -171,41 +173,41 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to duplicate item');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
       setIsDuplicating(false);
     }
   }
 
   return (
-    <Modal title={isEdit ? 'Edit item' : 'Add item'} onClose={onClose}>
+    <Modal title={isEdit ? t('itemForm.editTitle') : t('itemForm.addTitle')} onClose={onClose}>
       <form className={formStyles.form} onSubmit={handleSubmit}>
         {error && <div className={formStyles.error}>{error}</div>}
 
         <div className={formStyles.field}>
-          <label htmlFor="itemName">Name</label>
+          <label htmlFor="itemName">{t('itemForm.name')}</label>
           <input
             id="itemName"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Screwdriver, Winter jacket…"
+            placeholder={t('itemForm.namePlaceholder')}
             autoFocus
             required
           />
         </div>
 
         <div className={formStyles.field}>
-          <label htmlFor="itemDesc">Description <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></label>
+          <label htmlFor="itemDesc">{t('itemForm.description')} <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>{t('common.optional')}</span></label>
           <textarea
             id="itemDesc"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Brand, size, color…"
+            placeholder={t('itemForm.descPlaceholder')}
           />
         </div>
 
         <div className={formStyles.field}>
-          <label htmlFor="itemQty">Quantity</label>
+          <label htmlFor="itemQty">{t('itemForm.quantity')}</label>
           <input
             id="itemQty"
             type="number"
@@ -216,15 +218,15 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
         </div>
 
         <div className={formStyles.field}>
-          <label>Tags</label>
+          <label>{t('itemForm.tags')}</label>
           <CreatableSelect
             isMulti
             isClearable={false}
             value={tags}
             onChange={(vals) => setTags(vals as TagOption[])}
-            placeholder="Add tags…"
-            formatCreateLabel={(input) => `Add "${input}"`}
-            noOptionsMessage={() => 'Type to add a tag'}
+            placeholder={t('itemForm.tagPlaceholder')}
+            formatCreateLabel={(input) => t('itemForm.tagCreate', { label: input })}
+            noOptionsMessage={() => t('itemForm.tagNoOptions')}
             styles={selectStyles as object}
           />
         </div>
@@ -241,24 +243,24 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
             onClick={(e) => e.stopPropagation()}
           />
           <label htmlFor="isConsumable" onClick={(e) => e.stopPropagation()}>
-            Consumable — track stock level
+            {t('itemForm.consumable')}
           </label>
         </div>
 
         {isConsumable && (
           <div className={formStyles.subSection}>
             <div className={formStyles.field}>
-              <label htmlFor="minQty">Minimum stock</label>
+              <label htmlFor="minQty">{t('itemForm.minStock')}</label>
               <input
                 id="minQty"
                 type="number"
                 min="0"
                 value={minQuantity}
                 onChange={(e) => setMinQuantity(e.target.value)}
-                placeholder="e.g. 2"
+                placeholder={t('itemForm.minStockPlaceholder')}
               />
               <span className={formStyles.hint}>
-                Item appears in Shop when quantity drops below this value.
+                {t('itemForm.minStockHint')}
               </span>
             </div>
           </div>
@@ -273,7 +275,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                {isDeleting ? '…' : 'Delete'}
+                {isDeleting ? '…' : t('common.delete')}
               </button>
               <button
                 type="button"
@@ -281,12 +283,12 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
                 onClick={handleDuplicate}
                 disabled={isDuplicating}
               >
-                {isDuplicating ? '…' : 'Duplicate'}
+                {isDuplicating ? '…' : t('common.duplicate')}
               </button>
             </>
           )}
           <button type="submit" className={formStyles.submitBtn} disabled={isSaving}>
-            {isSaving ? 'Saving…' : isEdit ? 'Save changes' : 'Add item'}
+            {isSaving ? t('common.saving') : isEdit ? t('common.save') : t('itemForm.addBtn')}
           </button>
         </div>
       </form>

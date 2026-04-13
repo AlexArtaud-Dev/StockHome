@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, ChevronRight, Package, SearchIcon } from 'lucide-react';
 import { Layout } from '../../components/Layout/Layout';
 import { useDebounce, useApi } from '../../hooks/useApi';
@@ -63,6 +64,7 @@ function groupResults(results: SearchResult[]): RoomGroup[] {
 }
 
 export function SearchPage() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 300);
   const navigate = useNavigate();
@@ -78,27 +80,27 @@ export function SearchPage() {
   const grouped = groupResults(results ?? []);
 
   return (
-    <Layout title="Search">
+    <Layout title={t('search.title')}>
       <div className={styles.searchBox}>
         <SearchIcon size={18} className={styles.searchIcon} />
         <input
           type="search"
           className={styles.searchInput}
-          placeholder="Search items…"
+          placeholder={t('search.placeholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
         />
       </div>
 
-      {isLoading && query.length >= 2 && <p className={styles.hint}>Searching…</p>}
+      {isLoading && query.length >= 2 && <p className={styles.hint}>{t('search.searching')}</p>}
 
       {!isLoading && debouncedQuery.length >= 2 && results?.length === 0 && (
-        <p className={styles.hint}>No results for "{debouncedQuery}"</p>
+        <p className={styles.hint}>{t('search.noResults', { query: debouncedQuery })}</p>
       )}
 
       {query.length < 2 && (
-        <p className={styles.hint}>Type at least 2 characters to search</p>
+        <p className={styles.hint}>{t('search.hint')}</p>
       )}
 
       <div className={styles.tree}>

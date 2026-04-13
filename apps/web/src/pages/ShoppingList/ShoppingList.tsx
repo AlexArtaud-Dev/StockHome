@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Layout } from '../../components/Layout/Layout';
 import { useApi } from '../../hooks/useApi';
 import { api } from '../../services/api';
@@ -6,6 +7,7 @@ import { ShoppingListItem } from '@stockhome/shared';
 import styles from './ShoppingList.module.css';
 
 export function ShoppingListPage() {
+  const { t } = useTranslation();
   const { data: items, isLoading, error, refetch } = useApi<ShoppingListItem[]>(
     (signal) => api.get('/shopping-list', signal),
   );
@@ -17,12 +19,15 @@ export function ShoppingListPage() {
   }
 
   return (
-    <Layout title="Shopping List">
-      {isLoading && <p className={styles.hint}>Loading…</p>}
+    <Layout title={t('shoppingList.title')}>
+      {isLoading && <p className={styles.hint}>{t('common.loading')}</p>}
       {error && <p className={styles.error}>{error}</p>}
 
       {!isLoading && !error && items?.length === 0 && (
-        <p className={styles.hint}>All stocked up! Nothing to restock.</p>
+        <>
+          <p className={styles.hint}>{t('shoppingList.empty')}</p>
+          <p className={styles.hint}>{t('shoppingList.emptyDesc')}</p>
+        </>
       )}
 
       <div className={styles.list}>
@@ -39,8 +44,8 @@ export function ShoppingListPage() {
               <span className={styles.name}>{entry.item.name}</span>
               <span className={styles.reason}>
                 {entry.reason === 'below_minimum'
-                  ? `${entry.currentQuantity} / ${entry.minQuantity ?? '?'} minimum`
-                  : 'Renewal due'}
+                  ? `${t('shoppingList.currentQty', { qty: entry.currentQuantity })} · ${t('shoppingList.minQty', { min: entry.minQuantity ?? '?' })}`
+                  : t('shoppingList.renewalDue')}
               </span>
             </div>
           </div>

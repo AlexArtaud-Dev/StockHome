@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Edit2, Plus } from 'lucide-react';
 import { Tooltip } from '../../components/Tooltip/Tooltip';
 import { Layout } from '../../components/Layout/Layout';
@@ -10,6 +11,7 @@ import { RoomForm } from './RoomForm';
 import styles from './Home.module.css';
 
 export function HomePage() {
+  const { t } = useTranslation();
   const { data: rooms, isLoading, error, refetch } = useApi<Room[]>(
     (signal) => api.get('/rooms', signal),
   );
@@ -20,25 +22,25 @@ export function HomePage() {
     <Layout
       title="StockHome"
       actions={
-        <Tooltip content="Add room">
+        <Tooltip content={t('home.addRoom')}>
           <button
             className={styles.addBtn}
             onClick={() => setShowCreate(true)}
-            aria-label="Add room"
+            aria-label={t('home.addRoom')}
           >
             <Plus size={20} />
           </button>
         </Tooltip>
       }
     >
-      {isLoading && <p className={styles.loading}>Loading…</p>}
+      {isLoading && <p className={styles.loading}>{t('common.loading')}</p>}
       {error && <p className={styles.errorMsg}>{error}</p>}
 
       {!isLoading && !error && rooms?.length === 0 && (
         <div className={styles.empty}>
-          <p>No rooms yet.</p>
+          <p>{t('home.noRooms')}</p>
           <button className={styles.emptyLink} onClick={() => setShowCreate(true)}>
-            Add your first room
+            {t('home.addFirstRoom')}
           </button>
         </div>
       )}
@@ -62,11 +64,11 @@ export function HomePage() {
               </div>
               <div className={styles.roomName}>{room.name}</div>
             </Link>
-            <Tooltip content="Edit room">
+            <Tooltip content={t('home.addRoom')}>
               <button
                 className={styles.editBtn}
                 onClick={() => setEditRoom(room)}
-                aria-label={`Edit ${room.name}`}
+                aria-label={`${t('common.edit')} ${room.name}`}
               >
                 <Edit2 size={14} />
               </button>

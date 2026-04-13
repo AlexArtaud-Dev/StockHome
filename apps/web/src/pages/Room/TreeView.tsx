@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, Package, Plus, Box, Edit2 } from 'lucide-react';
 import { useApi } from '../../hooks/useApi';
 import { api } from '../../services/api';
@@ -52,6 +53,7 @@ function TreeNodeRow({
   onEditContainer,
   onEditItem,
 }: TreeNodeProps) {
+  const { t } = useTranslation();
   const { container, children, items } = node;
   const isExpanded = expanded.has(container.id);
   const isSelected = selected === container.id;
@@ -90,21 +92,21 @@ function TreeNodeRow({
           <button
             className={styles.actionBtn}
             onClick={(e) => { e.stopPropagation(); onAddItem(container.id, container.roomId); }}
-            title="Add item"
+            title={t('treeView.addItem')}
           >
             <Package size={13} />
           </button>
           <button
             className={styles.actionBtn}
             onClick={(e) => { e.stopPropagation(); onAddSub(container.id, container.roomId); }}
-            title="Add sub-container"
+            title={t('treeView.addSubContainer')}
           >
             <Box size={13} />
           </button>
           <button
             className={styles.actionBtn}
             onClick={(e) => { e.stopPropagation(); onEditContainer(container); }}
-            title="Edit container"
+            title={t('treeView.editContainer')}
           >
             <Edit2 size={13} />
           </button>
@@ -142,7 +144,7 @@ function TreeNodeRow({
                   <span className={styles.itemQty}>×{item.quantity}</span>
                 )}
                 {item.tags && item.tags.length > 0 && (
-                  <span className={styles.itemTags}>{item.tags.map((t) => t.name).join(' · ')}</span>
+                  <span className={styles.itemTags}>{item.tags.map((tag) => tag.name).join(' · ')}</span>
                 )}
               </button>
             </div>
@@ -158,6 +160,7 @@ interface TreeViewProps {
 }
 
 export function TreeView({ roomId }: TreeViewProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<string | null>(null);
   const [addItemTarget, setAddItemTarget] = useState<{ containerId: string; roomId: string } | null>(null);
@@ -217,18 +220,18 @@ export function TreeView({ roomId }: TreeViewProps) {
   }, [refetchContainers, refetchItems]);
 
   if (!containers || !items) {
-    return <p className={styles.loading}>Loading tree…</p>;
+    return <p className={styles.loading}>{t('common.loading')}</p>;
   }
 
   if (tree.length === 0) {
-    return <p className={styles.empty}>No containers yet. Use the grid view to add your first container.</p>;
+    return <p className={styles.empty}>{t('room.noContainers')}</p>;
   }
 
   return (
     <div className={styles.treeView}>
       <div className={styles.toolbar}>
-        <button className={styles.toolbarBtn} onClick={expandAll}>Expand all</button>
-        <button className={styles.toolbarBtn} onClick={collapseAll}>Collapse all</button>
+        <button className={styles.toolbarBtn} onClick={expandAll}>{t('treeView.expandAll')}</button>
+        <button className={styles.toolbarBtn} onClick={collapseAll}>{t('treeView.collapseAll')}</button>
       </div>
 
       <div className={styles.tree}>

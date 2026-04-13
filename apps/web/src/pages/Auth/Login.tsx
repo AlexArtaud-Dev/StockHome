@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { ApiError } from '../../services/api';
 import styles from './Auth.module.css';
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
@@ -20,7 +22,7 @@ export function LoginPage() {
       await login({ username, password });
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Login failed');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -30,13 +32,13 @@ export function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <h1 className={styles.title}>StockHome</h1>
-        <p className={styles.subtitle}>Sign in to your household</p>
+        <p className={styles.subtitle}>{t('auth.loginSubtitle')}</p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.field}>
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">{t('auth.email')}</label>
             <input
               id="username"
               type="text"
@@ -48,7 +50,7 @@ export function LoginPage() {
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">{t('auth.password')}</label>
             <input
               id="password"
               type="password"
@@ -60,13 +62,13 @@ export function LoginPage() {
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-            {isLoading ? 'Signing in…' : 'Sign in'}
+            {isLoading ? t('auth.signingIn') : t('auth.signIn')}
           </button>
         </form>
 
         <p className={styles.switchLink}>
-          No account?{' '}
-          <Link to="/auth/register">Create one</Link>
+          {t('auth.noAccount')}{' '}
+          <Link to="/auth/register">{t('auth.createOne')}</Link>
         </p>
       </div>
     </div>

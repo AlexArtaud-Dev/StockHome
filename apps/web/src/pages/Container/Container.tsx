@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Box, ChevronRight, Edit2, Package, Plus, QrCode, X } from 'lucide-react';
 import { Tooltip } from '../../components/Tooltip/Tooltip';
 import QRCodeSVG from 'react-qr-code';
@@ -14,6 +15,7 @@ import styles from './Container.module.css';
 
 export function ContainerPage() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
   const [optimisticQuantities, setOptimisticQuantities] = useState<Record<string, number>>({});
   const [showAddItem, setShowAddItem] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
@@ -62,23 +64,23 @@ export function ContainerPage() {
       showBack
       actions={
         <>
-          <Tooltip content="QR code">
-            <button className={styles.iconBtn} onClick={() => setShowQr(true)} aria-label="Show QR code">
+          <Tooltip content={t('container.showQr')}>
+            <button className={styles.iconBtn} onClick={() => setShowQr(true)} aria-label={t('container.showQr')}>
               <QrCode size={18} />
             </button>
           </Tooltip>
-          <Tooltip content="Add sub-container">
-            <button className={styles.iconBtn} onClick={() => setShowAddSubContainer(true)} aria-label="Add sub-container">
+          <Tooltip content={t('container.addSubContainer')}>
+            <button className={styles.iconBtn} onClick={() => setShowAddSubContainer(true)} aria-label={t('container.addSubContainer')}>
               <Box size={18} />
             </button>
           </Tooltip>
-          <Tooltip content="Edit container">
-            <button className={styles.iconBtn} onClick={() => setShowEditContainer(true)} aria-label="Edit container">
+          <Tooltip content={t('container.editContainer')}>
+            <button className={styles.iconBtn} onClick={() => setShowEditContainer(true)} aria-label={t('container.editContainer')}>
               <Edit2 size={18} />
             </button>
           </Tooltip>
-          <Tooltip content="Add item">
-            <button className={styles.iconBtn} onClick={() => setShowAddItem(true)} aria-label="Add item">
+          <Tooltip content={t('container.addItem')}>
+            <button className={styles.iconBtn} onClick={() => setShowAddItem(true)} aria-label={t('container.addItem')}>
               <Plus size={20} />
             </button>
           </Tooltip>
@@ -88,7 +90,7 @@ export function ContainerPage() {
       {/* Sub-containers */}
       {subContainers && subContainers.length > 0 && (
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Sub-containers</h2>
+          <h2 className={styles.sectionTitle}>{t('container.subContainers')}</h2>
           <div className={styles.subContainerGrid}>
             {subContainers.map((sub) => (
               <Link key={sub.id} to={`/containers/${sub.id}`} className={styles.subContainerCard}>
@@ -107,24 +109,24 @@ export function ContainerPage() {
       {/* Items */}
       <section className={styles.section}>
         {(subContainers && subContainers.length > 0) && (
-          <h2 className={styles.sectionTitle}>Items</h2>
+          <h2 className={styles.sectionTitle}>{t('container.items')}</h2>
         )}
 
-        {isLoading && <p className={styles.loading}>Loading…</p>}
+        {isLoading && <p className={styles.loading}>{t('common.loading')}</p>}
         {error && <p className={styles.errorMsg}>{error}</p>}
 
         {!isLoading && !error && items?.length === 0 && (subContainers?.length ?? 0) === 0 && (
           <div className={styles.empty}>
             <Package size={40} strokeWidth={1.5} />
-            <p>This container is empty</p>
+            <p>{t('container.empty')}</p>
             <button className={styles.emptyBtn} onClick={() => setShowAddItem(true)}>
-              Add first item
+              {t('container.addFirstItem')}
             </button>
           </div>
         )}
 
         {!isLoading && !error && items?.length === 0 && (subContainers?.length ?? 0) > 0 && (
-          <p className={styles.emptyInline}>No items directly in this container.</p>
+          <p className={styles.emptyInline}>{t('container.noDirectItems')}</p>
         )}
 
         <div className={styles.itemList}>
@@ -137,11 +139,11 @@ export function ContainerPage() {
                   <span className={styles.itemNameText}>{item.name}</span>
                   {item.tags && item.tags.length > 0 && (
                     <span className={styles.itemTags}>
-                      {item.tags.map((t) => t.name).join(' · ')}
+                      {item.tags.map((tag) => tag.name).join(' · ')}
                     </span>
                   )}
                   {isLow && (
-                    <span className={styles.itemLowBadge}>Low stock</span>
+                    <span className={styles.itemLowBadge}>{t('shoppingList.belowMinimum')}</span>
                   )}
                 </button>
                 <div className={styles.quantityControl}>
@@ -166,18 +168,18 @@ export function ContainerPage() {
 
       {/* QR code modal */}
       {showQr && container && (
-        <Modal title="Container QR Code" onClose={() => setShowQr(false)}>
+        <Modal title={t('container.qrModalTitle')} onClose={() => setShowQr(false)}>
           <div className={styles.qrModal}>
-            <p className={styles.qrDesc}>Scan to open <strong>{container.name}</strong> on any device.</p>
+            <p
+              className={styles.qrDesc}
+              dangerouslySetInnerHTML={{ __html: t('container.qrDesc', { name: container.name }) }}
+            />
             <div className={styles.qrWrapper} id="qr-wrapper">
               <QRCodeSVG value={qrUrl} size={220} level="M" id="qr-svg" />
               <p className={styles.qrName}>{container.name}</p>
             </div>
             <p className={styles.qrUrl}>{qrUrl}</p>
             <button className={styles.qrDownload} onClick={() => {
-              // react-qr-code sets viewBox="0 0 {moduleCount} {moduleCount}" (e.g. 29×29),
-              // not pixel coordinates. Cloning the full SVG element and nesting it
-              // preserves its own viewBox so it renders at the correct size.
               const qrSvgEl = document.getElementById('qr-svg') as SVGSVGElement | null;
               if (!qrSvgEl) return;
               const padding = 20;
@@ -197,8 +199,6 @@ export function ContainerPage() {
               bg.setAttribute('height', String(totalH));
               bg.setAttribute('fill', 'white');
               wrapper.appendChild(bg);
-              // Clone the full QR SVG (preserves viewBox + width + height),
-              // then position it as a nested <svg> at (padding, padding)
               const qrClone = qrSvgEl.cloneNode(true) as SVGSVGElement;
               qrClone.setAttribute('x', String(padding));
               qrClone.setAttribute('y', String(padding));
@@ -221,7 +221,7 @@ export function ContainerPage() {
               a.download = `${container.name}-qr.svg`;
               a.click();
             }}>
-              Download SVG
+              {t('container.downloadSvg')}
             </button>
           </div>
         </Modal>

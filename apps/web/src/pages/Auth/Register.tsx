@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { ApiError } from '../../services/api';
 import styles from './Auth.module.css';
 
 export function RegisterPage() {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -33,7 +35,7 @@ export function RegisterPage() {
       });
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Registration failed');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -43,7 +45,7 @@ export function RegisterPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <h1 className={styles.title}>StockHome</h1>
-        <p className={styles.subtitle}>Create your household</p>
+        <p className={styles.subtitle}>{t('auth.registerSubtitle')}</p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           {error && <div className={styles.error}>{error}</div>}
@@ -62,7 +64,7 @@ export function RegisterPage() {
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="displayName">Your name (optional)</label>
+            <label htmlFor="displayName">Your name {t('common.optional')}</label>
             <input
               id="displayName"
               name="displayName"
@@ -74,7 +76,7 @@ export function RegisterPage() {
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">{t('auth.email')}</label>
             <input
               id="username"
               name="username"
@@ -87,7 +89,7 @@ export function RegisterPage() {
           </div>
 
           <div className={styles.field}>
-            <label htmlFor="password">Password (min 8 characters)</label>
+            <label htmlFor="password">{t('auth.password')}</label>
             <input
               id="password"
               name="password"
@@ -101,13 +103,13 @@ export function RegisterPage() {
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-            {isLoading ? 'Creating…' : 'Create household'}
+            {isLoading ? t('auth.creating') : t('auth.createAccount')}
           </button>
         </form>
 
         <p className={styles.switchLink}>
-          Already have an account?{' '}
-          <Link to="/auth/login">Sign in</Link>
+          {t('auth.alreadyHaveAccount')}{' '}
+          <Link to="/auth/login">{t('auth.signInLink')}</Link>
         </p>
       </div>
     </div>

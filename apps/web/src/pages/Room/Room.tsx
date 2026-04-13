@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CheckSquare, Edit2, FileText, LayoutGrid, LayoutList, Plus, Square, X } from 'lucide-react';
 import { Tooltip } from '../../components/Tooltip/Tooltip';
 import { Layout } from '../../components/Layout/Layout';
@@ -18,6 +19,7 @@ const CONTAINER_TYPE_ICONS: Record<string, string> = {
 
 export function RoomPage() {
   const { id } = useParams<{ id: string }>();
+  const { t } = useTranslation();
   const [showCreateContainer, setShowCreateContainer] = useState(false);
   const [editContainer, setEditContainer] = useState<Container | null>(null);
   const [showEditRoom, setShowEditRoom] = useState(false);
@@ -69,22 +71,22 @@ export function RoomPage() {
       showBack
       actions={
         <>
-          <Tooltip content={viewMode === 'grid' ? 'Tree view' : 'Grid view'}>
+          <Tooltip content={viewMode === 'grid' ? t('room.treeView') : t('room.gridView')}>
             <button
               className={styles.iconBtn}
               onClick={() => { setViewMode(viewMode === 'grid' ? 'tree' : 'grid'); clearSelection(); }}
-              aria-label={viewMode === 'grid' ? 'Switch to tree view' : 'Switch to grid view'}
+              aria-label={viewMode === 'grid' ? t('room.treeView') : t('room.gridView')}
             >
               {viewMode === 'grid' ? <LayoutList size={18} /> : <LayoutGrid size={18} />}
             </button>
           </Tooltip>
-          <Tooltip content="Edit room">
-            <button className={styles.iconBtn} onClick={() => setShowEditRoom(true)} aria-label="Edit room">
+          <Tooltip content={t('room.editRoom')}>
+            <button className={styles.iconBtn} onClick={() => setShowEditRoom(true)} aria-label={t('room.editRoom')}>
               <Edit2 size={18} />
             </button>
           </Tooltip>
-          <Tooltip content="Add container">
-            <button className={styles.iconBtn} onClick={() => setShowCreateContainer(true)} aria-label="Add container">
+          <Tooltip content={t('room.addContainer')}>
+            <button className={styles.iconBtn} onClick={() => setShowCreateContainer(true)} aria-label={t('room.addContainer')}>
               <Plus size={20} />
             </button>
           </Tooltip>
@@ -93,14 +95,14 @@ export function RoomPage() {
     >
       {viewMode === 'grid' && (
         <>
-          {isLoading && <p className={styles.loading}>Loading…</p>}
+          {isLoading && <p className={styles.loading}>{t('common.loading')}</p>}
           {error && <p className={styles.errorMsg}>{error}</p>}
 
           {!isLoading && !error && containers?.length === 0 && (
             <div className={styles.empty}>
-              <p>No containers yet.</p>
+              <p>{t('room.noContainers')}</p>
               <button className={styles.emptyLink} onClick={() => setShowCreateContainer(true)}>
-                Add your first container
+                {t('room.addFirstContainer')}
               </button>
             </div>
           )}
@@ -133,7 +135,7 @@ export function RoomPage() {
                   <button
                     className={`${styles.selectBtn} ${isSelected ? styles.selectBtnActive : ''}`}
                     onClick={(e) => toggleSelect(container.id, e)}
-                    aria-label={isSelected ? `Deselect ${container.name}` : `Select ${container.name}`}
+                    aria-label={isSelected ? t('room.deselectContainer', { name: container.name }) : t('room.selectContainer', { name: container.name })}
                   >
                     {isSelected ? <CheckSquare size={16} /> : <Square size={16} />}
                   </button>
@@ -141,7 +143,7 @@ export function RoomPage() {
                   <button
                     className={styles.editBtn}
                     onClick={(e) => { e.preventDefault(); setEditContainer(container); }}
-                    aria-label={`Edit ${container.name}`}
+                    aria-label={t('room.editContainer', { name: container.name })}
                   >
                     <Edit2 size={14} />
                   </button>
@@ -158,7 +160,7 @@ export function RoomPage() {
       {hasSelection && (
         <div className={styles.selectionBar}>
           <span className={styles.selectionCount}>
-            {selectedIds.size} selected
+            {t('room.selected', { count: selectedIds.size })}
           </span>
           <div className={styles.selectionActions}>
             <button
@@ -166,12 +168,12 @@ export function RoomPage() {
               onClick={() => setShowQrPdf(true)}
             >
               <FileText size={15} />
-              QR Labels PDF
+              {t('room.qrLabels')}
             </button>
             <button
               className={styles.selectionClear}
               onClick={clearSelection}
-              aria-label="Clear selection"
+              aria-label={t('room.clearSelection')}
             >
               <X size={15} />
             </button>

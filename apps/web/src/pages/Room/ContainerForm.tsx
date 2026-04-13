@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/Modal/Modal';
 import { api, ApiError } from '../../services/api';
 import { Container, ContainerType } from '@stockhome/shared';
 import formStyles from '../../components/Form/Form.module.css';
-
-const CONTAINER_TYPES: { value: ContainerType; label: string }[] = [
-  { value: 'box', label: '📦 Box' },
-  { value: 'shelf', label: '🗄️ Shelf' },
-  { value: 'drawer', label: '🗂️ Drawer' },
-  { value: 'bag', label: '👜 Bag' },
-  { value: 'other', label: '📁 Other' },
-];
 
 interface Props {
   roomId: string;
@@ -21,6 +14,7 @@ interface Props {
 }
 
 export function ContainerForm({ roomId, container, parentContainerId, onClose, onSaved }: Props) {
+  const { t } = useTranslation();
   const isEdit = Boolean(container);
   const [name, setName] = useState(container?.name ?? '');
   const [type, setType] = useState<ContainerType>(container?.type ?? 'box');
@@ -29,6 +23,14 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
+
+  const CONTAINER_TYPES: { value: ContainerType; label: string }[] = [
+    { value: 'box', label: t('containerTypes.box') },
+    { value: 'shelf', label: t('containerTypes.shelf') },
+    { value: 'drawer', label: t('containerTypes.drawer') },
+    { value: 'bag', label: t('containerTypes.bag') },
+    { value: 'other', label: t('containerTypes.other') },
+  ];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,7 +55,7 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to save container');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
     } finally {
       setIsSaving(false);
     }
@@ -61,14 +63,14 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
 
   async function handleDelete() {
     if (!container) return;
-    if (!window.confirm(`Delete "${container.name}"? All items inside will also be deleted.`)) return;
+    if (!window.confirm(t('containerForm.confirmDelete', { name: container.name }))) return;
     setIsDeleting(true);
     try {
       await api.delete(`/containers/${container.id}`);
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to delete container');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
       setIsDeleting(false);
     }
   }
@@ -81,16 +83,16 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
       onSaved();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to duplicate container');
+      setError(err instanceof ApiError ? err.message : t('common.error'));
       setIsDuplicating(false);
     }
   }
 
   const title = isEdit
-    ? 'Edit container'
+    ? t('containerForm.editTitle')
     : parentContainerId
-    ? 'Add sub-container'
-    : 'New container';
+    ? t('containerForm.subTitle')
+    : t('containerForm.newTitle');
 
   return (
     <Modal title={title} onClose={onClose}>
@@ -98,38 +100,38 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
         {error && <div className={formStyles.error}>{error}</div>}
 
         <div className={formStyles.field}>
-          <label htmlFor="containerName">Name</label>
+          <label htmlFor="containerName">{t('containerForm.name')}</label>
           <input
             id="containerName"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={parentContainerId ? 'e.g. Shelf A, Compartment 1…' : 'e.g. Winter clothes, Power tools…'}
+            placeholder={parentContainerId ? t('containerForm.namePlaceholderSub') : t('containerForm.namePlaceholderTop')}
             autoFocus
             required
           />
         </div>
 
         <div className={formStyles.field}>
-          <label htmlFor="containerType">Type</label>
+          <label htmlFor="containerType">{t('containerForm.type')}</label>
           <select
             id="containerType"
             value={type}
             onChange={(e) => setType(e.target.value as ContainerType)}
           >
-            {CONTAINER_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
+            {CONTAINER_TYPES.map((ct) => (
+              <option key={ct.value} value={ct.value}>{ct.label}</option>
             ))}
           </select>
         </div>
 
         <div className={formStyles.field}>
-          <label htmlFor="containerDesc">Description <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></label>
+          <label htmlFor="containerDesc">{t('containerForm.description')} <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>{t('common.optional')}</span></label>
           <textarea
             id="containerDesc"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="What's stored here…"
+            placeholder={t('containerForm.descPlaceholder')}
           />
         </div>
 
@@ -142,7 +144,7 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
                 onClick={handleDelete}
                 disabled={isDeleting}
               >
-                {isDeleting ? '…' : 'Delete'}
+                {isDeleting ? '…' : t('common.delete')}
               </button>
               <button
                 type="button"
@@ -150,12 +152,12 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
                 onClick={handleDuplicate}
                 disabled={isDuplicating}
               >
-                {isDuplicating ? '…' : 'Duplicate'}
+                {isDuplicating ? '…' : t('common.duplicate')}
               </button>
             </>
           )}
           <button type="submit" className={formStyles.submitBtn} disabled={isSaving}>
-            {isSaving ? 'Saving…' : isEdit ? 'Save changes' : 'Create'}
+            {isSaving ? t('common.saving') : isEdit ? t('common.save') : t('containerForm.createBtn')}
           </button>
         </div>
       </form>

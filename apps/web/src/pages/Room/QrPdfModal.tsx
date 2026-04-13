@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import QRCodeSVG from 'react-qr-code';
@@ -72,6 +73,7 @@ function collectIds(
 }
 
 export function QrPdfModal({ selectedIds, allContainers, roomOrigin, onClose }: Props) {
+  const { t } = useTranslation();
   const [recursive, setRecursive] = useState(false);
   const [sizeMm, setSizeMm] = useState(60);
   const [generating, setGenerating] = useState(false);
@@ -171,12 +173,12 @@ export function QrPdfModal({ selectedIds, allContainers, roomOrigin, onClose }: 
   }
 
   return (
-    <Modal title="Generate QR Labels PDF" onClose={onClose}>
+    <Modal title={t('qrPdf.title')} onClose={onClose}>
       <div className={formStyles.form}>
         <div className={styles.summary}>
           <span className={styles.summaryCount}>{finalContainers.length}</span>
           <span className={styles.summaryLabel}>
-            container{finalContainers.length !== 1 ? 's' : ''} selected
+            {t(finalContainers.length === 1 ? 'qrPdf.containersSelected_one' : 'qrPdf.containersSelected_other', { count: finalContainers.length })}
           </span>
         </div>
 
@@ -193,13 +195,13 @@ export function QrPdfModal({ selectedIds, allContainers, roomOrigin, onClose }: 
             onClick={(e) => e.stopPropagation()}
           />
           <label htmlFor="recursive" onClick={(e) => e.stopPropagation()}>
-            Include all sub-containers (recursive)
+            {t('qrPdf.includeSubContainers')}
           </label>
         </div>
 
         {/* Size selection */}
         <div className={formStyles.field}>
-          <label>Label size</label>
+          <label>{t('qrPdf.labelSize')}</label>
           <div className={styles.sizeGrid}>
             {QR_SIZES.map((s) => (
               <button
@@ -218,7 +220,7 @@ export function QrPdfModal({ selectedIds, allContainers, roomOrigin, onClose }: 
         {/* Preview list */}
         {finalContainers.length > 0 && (
           <div className={styles.previewList}>
-            <span className={styles.previewTitle}>Labels to print</span>
+            <span className={styles.previewTitle}>{t('qrPdf.labelsToPrint')}</span>
             <div className={styles.previewItems}>
               {finalContainers.map((c) => (
                 <span key={c.id} className={styles.previewItem}>{c.name}</span>
@@ -234,7 +236,9 @@ export function QrPdfModal({ selectedIds, allContainers, roomOrigin, onClose }: 
             onClick={generate}
             disabled={generating || finalContainers.length === 0}
           >
-            {generating ? 'Generating…' : `Print ${finalContainers.length} label${finalContainers.length !== 1 ? 's' : ''}`}
+            {generating
+              ? t('common.generating')
+              : t(finalContainers.length === 1 ? 'qrPdf.print_one' : 'qrPdf.print_other', { count: finalContainers.length })}
           </button>
         </div>
       </div>
