@@ -8,3 +8,8 @@ uploads/
 coverage/
 .DS_Store
 *.log
+.claude/
+packages/shared/src/*.js
+packages/shared/src/*.js.map
+packages/shared/src/*.d.ts
+packages/shared/src/*.d.ts.map
