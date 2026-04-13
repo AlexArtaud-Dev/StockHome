@@ -28,7 +28,7 @@ export class ItemController {
     @Query('containerId') containerId?: string,
     @Query('roomId') roomId?: string,
   ) {
-    return this.itemService.findAll(user.householdId, containerId, roomId);
+    return this.itemService.findAll(user.householdId!, containerId, roomId);
   }
 
   @Get(':id')
@@ -38,12 +38,12 @@ export class ItemController {
 
   @Post()
   create(@Body() dto: CreateItemDto, @CurrentUser() user: JwtPayload) {
-    return this.itemService.create(dto, user.householdId, user.sub);
+    return this.itemService.create(dto, user.householdId!, user.sub);
   }
 
   @Post('bulk')
   bulkCreate(@Body() dto: BulkCreateItemDto, @CurrentUser() user: JwtPayload) {
-    return this.itemService.bulkCreate(dto, user.householdId, user.sub);
+    return this.itemService.bulkCreate(dto, user.householdId!, user.sub);
   }
 
   @Patch(':id')
@@ -52,7 +52,7 @@ export class ItemController {
     @Body() dto: UpdateItemDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.itemService.update(id, dto, user.householdId, user.sub);
+    return this.itemService.update(id, dto, user.householdId!, user.sub);
   }
 
   @Patch(':id/quantity')
@@ -61,17 +61,17 @@ export class ItemController {
     @Body() dto: AdjustQuantityDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.itemService.adjustQuantity(id, dto, user.householdId, user.sub);
+    return this.itemService.adjustQuantity(id, dto, user.householdId!, user.sub);
   }
 
   @Post(':id/duplicate')
   duplicate(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return this.itemService.duplicate(id, user.householdId, user.sub);
+    return this.itemService.duplicate(id, user.householdId!, user.sub);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return this.itemService.remove(id, user.householdId, user.sub);
+    return this.itemService.remove(id, user.householdId!, user.sub);
   }
 }

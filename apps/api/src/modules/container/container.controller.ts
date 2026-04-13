@@ -28,7 +28,7 @@ export class ContainerController {
     @Query('roomId') roomId?: string,
     @Query('parentContainerId') parentContainerId?: string,
   ) {
-    return this.containerService.findAll(user.householdId, roomId, parentContainerId);
+    return this.containerService.findAll(user.householdId!, roomId, parentContainerId);
   }
 
   @Get('by-qr/:qrCode')
