@@ -117,9 +117,7 @@ export class AuthService {
   }
 
   async verifyEmail(dto: VerifyEmailDto): Promise<{ message: string }> {
-    this.logger.debug(`Verifying token: "${dto.token}"`);
     const user = await this.userRepo.findOneBy({ emailVerificationToken: dto.token });
-    this.logger.debug(`Token lookup result: ${user ? user.email : 'NOT FOUND'}`);
     if (!user) {
       throw new BadRequestException('Invalid or expired verification token');
     }

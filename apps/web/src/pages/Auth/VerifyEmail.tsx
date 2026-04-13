@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, ApiError } from '../../services/api';
@@ -14,10 +14,14 @@ export function VerifyEmailPage() {
   const [resendCountdown, setResendCountdown] = useState(0);
   const [resending, setResending] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
+  // Prevent React Strict Mode from calling the API twice — the first call clears
+  // the token from the DB, so the second call would fail with "not found".
+  const didVerify = useRef(false);
 
   // If token is in URL, verify immediately
   useEffect(() => {
-    if (!token) return;
+    if (!token || didVerify.current) return;
+    didVerify.current = true;
     setVerifyState('verifying');
     api.post('/auth/verify-email', { token })
       .then(() => setVerifyState('success'))
