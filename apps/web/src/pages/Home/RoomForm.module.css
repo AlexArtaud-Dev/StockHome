@@ -112,14 +112,5 @@
 
 .pickerWrapper {
   margin-top: var(--space-2);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-lg);
-}
-
-/* Force picker to fill container width */
-.pickerWrapper em-emoji-picker {
-  --border-radius: 0;
-  width: 100%;
+  /* Let the picker render at its natural size — no overflow clipping */
 }
