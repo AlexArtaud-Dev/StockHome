@@ -14,30 +14,53 @@ export class AdminSeedService implements OnApplicationBootstrap {
     private readonly userRepo: Repository<UserEntity>,
   ) {}
 
+  private generatePassword(): string {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$';
+    let password = '';
+    for (let i = 0; i < 16; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+  }
+
   async onApplicationBootstrap(): Promise<void> {
     const adminEmail = process.env['ADMIN_EMAIL'];
     if (!adminEmail) {
       return;
     }
 
+    const firstLaunch = process.env['FIRST_LAUNCH'] === 'true';
     const existing = await this.userRepo.findOneBy({ email: adminEmail.toLowerCase() });
+
     if (existing) {
-      // Ensure the existing account is an admin
-      if (!existing.isAdmin) {
+      if (firstLaunch) {
+        // Reset password on first launch
+        const password = this.generatePassword();
+        existing.passwordHash = await bcrypt.hash(password, 12);
         existing.isAdmin = true;
+        existing.isEmailVerified = true;
+        existing.isBanned = false;
         await this.userRepo.save(existing);
-        this.logger.log(`Promoted existing user ${adminEmail} to admin`);
+
+        this.logger.log('='.repeat(60));
+        this.logger.log('ADMIN PASSWORD RESET (FIRST_LAUNCH=true)');
+        this.logger.log(`  Email   : ${adminEmail}`);
+        this.logger.log(`  Password: ${password}`);
+        this.logger.log('Set FIRST_LAUNCH=false after logging in!');
+        this.logger.log('='.repeat(60));
+      } else {
+        // Just ensure admin flag is set
+        if (!existing.isAdmin) {
+          existing.isAdmin = true;
+          await this.userRepo.save(existing);
+          this.logger.log(`Promoted existing user ${adminEmail} to admin`);
+        }
       }
       return;
     }
 
-    // Generate a random password
-    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$';
-    let password = '';
-    for (let i = 0; i < 16; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-
+    // Account does not exist — create it regardless of FIRST_LAUNCH
+    const password = this.generatePassword();
     const passwordHash = await bcrypt.hash(password, 12);
     const user = this.userRepo.create({
       id: uuidv4(),
@@ -58,7 +81,7 @@ export class AdminSeedService implements OnApplicationBootstrap {
     this.logger.log('ADMIN ACCOUNT CREATED');
     this.logger.log(`  Email   : ${adminEmail}`);
     this.logger.log(`  Password: ${password}`);
-    this.logger.log('Change this password after first login!');
+    this.logger.log('Set FIRST_LAUNCH=false after logging in!');
     this.logger.log('='.repeat(60));
   }
 }
