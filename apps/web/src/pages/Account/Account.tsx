@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { FileDown, Users } from 'lucide-react';
 import { Layout } from '../../components/Layout/Layout';
+import { ConfirmDeleteModal } from '../../components/ConfirmDeleteModal/ConfirmDeleteModal';
 import { useAuth } from '../../context/AuthContext';
 import { useHousehold } from '../../context/HouseholdContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,6 +16,7 @@ export function AccountPage() {
   const { user, logout, refreshUser } = useAuth();
   const { households, refreshHouseholds } = useHousehold();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
 
   // Profile section
   const [firstName, setFirstName] = useState(user?.firstName ?? '');
@@ -34,11 +38,8 @@ export function AccountPage() {
   const [newHouseholdName, setNewHouseholdName] = useState('');
   const [newHouseholdType, setNewHouseholdType] = useState<Household['type']>('other');
 
-  // Invite form state per household
-  const [inviteOpenId, setInviteOpenId] = useState<string | null>(null);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteStatus, setInviteStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const [inviteError, setInviteError] = useState<string | null>(null);
+  // Delete household
+  const [deleteTarget, setDeleteTarget] = useState<Household | null>(null);
 
   useEffect(() => {
     api.get<HouseholdInvitation[]>('/invitations/pending')
@@ -97,25 +98,10 @@ export function AccountPage() {
     }
   }
 
-  function openInvite(householdId: string) {
-    setInviteOpenId(householdId);
-    setInviteEmail('');
-    setInviteStatus('idle');
-    setInviteError(null);
-  }
-
-  async function handleSendInvite(e: React.FormEvent, householdId: string) {
-    e.preventDefault();
-    setInviteStatus('sending');
-    setInviteError(null);
-    try {
-      await api.post(`/households/${householdId}/invite`, { email: inviteEmail });
-      setInviteStatus('sent');
-      setInviteEmail('');
-    } catch (err) {
-      setInviteStatus('error');
-      setInviteError(err instanceof ApiError ? err.message : t('common.error'));
-    }
+  async function handleDeleteHousehold(householdId: string) {
+    await api.delete(`/households/${householdId}`);
+    await refreshHouseholds();
+    setDeleteTarget(null);
   }
 
   async function handleLeave(householdId: string) {
@@ -269,46 +255,37 @@ export function AccountPage() {
                   </span>
                 </div>
                 <div className={styles.householdActions}>
-                  {h.isOwner && (
-                    <button
-                      className={styles.inviteBtn}
-                      onClick={() => inviteOpenId === h.id ? setInviteOpenId(null) : openInvite(h.id)}
-                    >
-                      {t('household.inviteMember')}
-                    </button>
-                  )}
+                  <button
+                    className={styles.iconBtn}
+                    title={t('account.exportPdf')}
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = `/api/v1/export/household/pdf`;
+                      link.download = `${h.name}.pdf`;
+                      link.click();
+                    }}
+                  >
+                    <FileDown size={15} />
+                  </button>
+                  <button
+                    className={styles.iconBtn}
+                    title={t('account.manageMembers')}
+                    onClick={() => navigate('/members')}
+                  >
+                    <Users size={15} />
+                  </button>
                   {!h.isOwner && (
                     <button className={styles.leaveBtn} onClick={() => handleLeave(h.id)}>
                       {t('account.leaveHousehold')}
                     </button>
                   )}
+                  {h.isOwner && (
+                    <button className={styles.deleteHouseholdBtn} onClick={() => setDeleteTarget(h)}>
+                      {t('account.deleteHousehold')}
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {/* Inline invite form */}
-              {inviteOpenId === h.id && (
-                <form className={styles.inviteForm} onSubmit={(e) => handleSendInvite(e, h.id)}>
-                  <input
-                    type="email"
-                    className={styles.inviteInput}
-                    placeholder={t('household.inviteEmailPlaceholder')}
-                    value={inviteEmail}
-                    onChange={(e) => { setInviteEmail(e.target.value); setInviteStatus('idle'); }}
-                    autoFocus
-                    required
-                  />
-                  <div className={styles.formRow}>
-                    <button type="submit" className={styles.saveBtn} disabled={inviteStatus === 'sending'}>
-                      {inviteStatus === 'sending' ? t('household.sending') : t('household.sendInvite')}
-                    </button>
-                    <button type="button" className={styles.cancelBtn} onClick={() => setInviteOpenId(null)}>
-                      {t('common.cancel')}
-                    </button>
-                  </div>
-                  {inviteStatus === 'sent' && <p className={styles.successMsg}>{t('household.inviteSent')}</p>}
-                  {inviteStatus === 'error' && <p className={styles.errorMsg}>{inviteError}</p>}
-                </form>
-              )}
             </div>
           ))}
         </div>
@@ -408,6 +385,19 @@ export function AccountPage() {
           Sign out
         </button>
       </section>
+
+      {/* Delete household confirmation modal */}
+      {deleteTarget && (
+        <ConfirmDeleteModal
+          title={t('account.confirmDelete1', { name: deleteTarget.name })}
+          step1Body={t('account.confirmDelete1Body')}
+          step2Body={t('account.confirmDelete2Body')}
+          confirmName={deleteTarget.name}
+          confirmPlaceholder={t('account.confirmDeletePlaceholder')}
+          onConfirm={() => handleDeleteHousehold(deleteTarget.id)}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </Layout>
   );
 }

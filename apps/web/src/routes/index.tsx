@@ -17,6 +17,7 @@ import { SettingsPage } from '../pages/Settings/Settings';
 import { AccountPage } from '../pages/Account/Account';
 import { AdminPage } from '../pages/Admin/Admin';
 import { BulkAddPage } from '../pages/BulkAdd/BulkAdd';
+import { MembersPage } from '../pages/Members/Members';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -77,6 +78,7 @@ export function AppRoutes() {
 
       {/* Account and admin — require auth only (not household) */}
       <Route path="/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
+      <Route path="/members" element={<RequireHousehold><MembersPage /></RequireHousehold>} />
       <Route path="/admin" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ContainerEntity } from '../../database/entities/container.entity';
 import { RoomEntity } from '../../database/entities/room.entity';
+import { ItemEntity } from '../../database/entities/item.entity';
 import { ContainerController } from './container.controller';
 import { ContainerService } from './container.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ContainerEntity, RoomEntity])],
+  imports: [TypeOrmModule.forFeature([ContainerEntity, RoomEntity, ItemEntity])],
   controllers: [ContainerController],
   providers: [ContainerService],
   exports: [ContainerService],

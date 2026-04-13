@@ -18,6 +18,7 @@ import { SearchModule } from './modules/search/search.module';
 import { MovementLogModule } from './modules/movement-log/movement-log.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { ExportModule } from './modules/export/export.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -44,6 +45,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     MovementLogModule,
     UploadModule,
     AdminModule,
+    ExportModule,
   ],
   providers: [
     {

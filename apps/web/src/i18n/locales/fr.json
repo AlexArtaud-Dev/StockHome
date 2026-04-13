@@ -23,7 +23,8 @@
     "search": "Rechercher",
     "scanQr": "Scanner QR",
     "shop": "Courses",
-    "account": "Compte"
+    "account": "Compte",
+    "members": "Membres"
   },
   "home": {
     "noRooms": "Aucune pièce pour l'instant.",
@@ -186,7 +187,15 @@
     "decline": "Refuser",
     "inviteFrom": "{{householdName}} · invité par {{inviterName}}",
     "language": "Langue",
-    "theme": "Thème"
+    "theme": "Thème",
+    "deleteHousehold": "Supprimer le foyer",
+    "confirmDelete1": "Supprimer \"{{name}}\" ?",
+    "confirmDelete1Body": "Cela supprimera définitivement le foyer et tout son contenu (pièces, conteneurs, objets). Cette action est irréversible.",
+    "confirmDelete2": "Êtes-vous absolument sûr ?",
+    "confirmDelete2Body": "Tapez le nom du foyer pour confirmer la suppression.",
+    "confirmDeletePlaceholder": "Nom du foyer…",
+    "manageMembers": "Gérer les membres",
+    "exportPdf": "Exporter en PDF"
   },
   "household": {
     "createTitle": "Nouveau foyer",
@@ -271,5 +280,14 @@
   "scan": {
     "title": "Scanner un QR",
     "notFound": "Conteneur introuvable dans votre foyer."
+  },
+  "members": {
+    "title": "Membres",
+    "currentMembers": "Membres actuels",
+    "inviteSection": "Inviter quelqu'un",
+    "owner": "Propriétaire",
+    "you": "Vous",
+    "joinedAt": "Rejoint le {{date}}",
+    "removeMember": "Retirer le membre"
   }
 }

@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   ShoppingCart,
   User,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useHousehold } from '../../context/HouseholdContext';
@@ -88,6 +89,11 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
         </NavLink>
 
         <div className={styles.navSpacer} />
+
+        <NavLink to="/members" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
+          <Users size={20} />
+          <span>{t('nav.members')}</span>
+        </NavLink>
 
         {user?.isAdmin && (
           <NavLink to="/admin" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>

@@ -23,7 +23,8 @@
     "search": "Search",
     "scanQr": "Scan QR",
     "shop": "Shop",
-    "account": "Account"
+    "account": "Account",
+    "members": "Members"
   },
   "home": {
     "noRooms": "No rooms yet.",
@@ -186,7 +187,15 @@
     "decline": "Decline",
     "inviteFrom": "{{householdName}} · invited by {{inviterName}}",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "deleteHousehold": "Delete household",
+    "confirmDelete1": "Delete \"{{name}}\"?",
+    "confirmDelete1Body": "This will permanently delete the household and all its contents (rooms, containers, items). This action cannot be undone.",
+    "confirmDelete2": "Are you absolutely sure?",
+    "confirmDelete2Body": "Type the household name to confirm deletion.",
+    "confirmDeletePlaceholder": "Type household name…",
+    "manageMembers": "Manage members",
+    "exportPdf": "Export as PDF"
   },
   "household": {
     "createTitle": "New household",
@@ -271,5 +280,14 @@
   "scan": {
     "title": "Scan QR Code",
     "notFound": "Container not found in your household."
+  },
+  "members": {
+    "title": "Members",
+    "currentMembers": "Current members",
+    "inviteSection": "Invite someone",
+    "owner": "Owner",
+    "you": "You",
+    "joinedAt": "Joined {{date}}",
+    "removeMember": "Remove member"
   }
 }
