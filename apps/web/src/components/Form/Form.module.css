@@ -190,6 +190,23 @@
 }
 .deleteBtn:hover { background-color: var(--color-danger); color: #fff; }
 
+.duplicateBtn {
+  padding: 11px var(--space-4);
+  background-color: transparent;
+  color: var(--color-text-muted);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  min-height: var(--touch-min);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.duplicateBtn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: rgba(99, 102, 241, 0.06);
+}
+
 /* ── Tag input ────────────────────────────────────────────────────── */
 .tagInput {
   display: flex;

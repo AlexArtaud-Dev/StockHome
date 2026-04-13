@@ -63,6 +63,11 @@ export class ItemController {
     return this.itemService.adjustQuantity(id, dto, user.householdId, user.sub);
   }
 
+  @Post(':id/duplicate')
+  duplicate(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.itemService.duplicate(id, user.householdId, user.sub);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {

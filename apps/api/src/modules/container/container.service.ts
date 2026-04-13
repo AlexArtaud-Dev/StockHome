@@ -140,6 +140,29 @@ export class ContainerService {
     return this.toDto(container);
   }
 
+  async duplicate(id: string, householdId: string): Promise<Container> {
+    const container = await this.containerRepo
+      .createQueryBuilder('c')
+      .innerJoin('c.room', 'r')
+      .where('c.id = :id', { id })
+      .andWhere('r.householdId = :householdId', { householdId })
+      .getOne();
+    if (!container) throw new NotFoundException('Container not found');
+    const copy = this.containerRepo.create({
+      id: uuidv4(),
+      roomId: container.roomId,
+      parentContainerId: container.parentContainerId,
+      name: `${container.name} (copy)`,
+      description: container.description,
+      type: container.type,
+      icon: container.icon,
+      qrCode: uuidv4(),
+      sortOrder: container.sortOrder,
+    });
+    await this.containerRepo.save(copy);
+    return this.toDto(copy);
+  }
+
   async remove(id: string, householdId: string): Promise<void> {
     const container = await this.containerRepo
       .createQueryBuilder('c')

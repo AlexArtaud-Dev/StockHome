@@ -119,6 +119,7 @@
 }
 
 /* ── Select checkbox button ─────────────────────────────────────────── */
+/* Sits to the LEFT of editBtn (top-right area), so it never overlaps the emoji icon */
 .selectBtn {
   display: flex;
   align-items: center;
@@ -130,7 +131,7 @@
   transition: background-color var(--transition-fast), color var(--transition-fast);
   position: absolute;
   top: var(--space-3);
-  left: var(--space-3);
+  right: calc(var(--space-3) + 30px + var(--space-1));
   z-index: 2;
   opacity: 0;
 }

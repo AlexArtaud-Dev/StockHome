@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Edit2, Plus } from 'lucide-react';
+import { Tooltip } from '../../components/Tooltip/Tooltip';
 import { Layout } from '../../components/Layout/Layout';
 import { useApi } from '../../hooks/useApi';
 import { api } from '../../services/api';
@@ -19,13 +20,15 @@ export function HomePage() {
     <Layout
       title="StockHome"
       actions={
-        <button
-          className={styles.addBtn}
-          onClick={() => setShowCreate(true)}
-          aria-label="Add room"
-        >
-          <Plus size={20} />
-        </button>
+        <Tooltip content="Add room">
+          <button
+            className={styles.addBtn}
+            onClick={() => setShowCreate(true)}
+            aria-label="Add room"
+          >
+            <Plus size={20} />
+          </button>
+        </Tooltip>
       }
     >
       {isLoading && <p className={styles.loading}>Loading…</p>}
@@ -44,22 +47,30 @@ export function HomePage() {
         {rooms?.map((room) => (
           <div key={room.id} className={styles.roomWrapper}>
             <Link to={`/rooms/${room.id}`} className={styles.roomCard}>
+              {/* Hero — photo or colored swatch with big emoji */}
               <div
-                className={styles.roomColor}
-                style={{ backgroundColor: room.color ?? 'var(--color-primary)' }}
-              />
-              <div className={styles.roomName}>
-                {room.icon && <span className={styles.roomIcon}>{room.icon}</span>}
-                {room.name}
+                className={styles.roomHero}
+                style={
+                  room.photoPath
+                    ? { backgroundImage: `url(${room.photoPath})` }
+                    : { backgroundColor: room.color ?? 'var(--color-primary)' }
+                }
+              >
+                {!room.photoPath && room.icon && (
+                  <span className={styles.roomHeroIcon}>{room.icon}</span>
+                )}
               </div>
+              <div className={styles.roomName}>{room.name}</div>
             </Link>
-            <button
-              className={styles.editBtn}
-              onClick={() => setEditRoom(room)}
-              aria-label={`Edit ${room.name}`}
-            >
-              ···
-            </button>
+            <Tooltip content="Edit room">
+              <button
+                className={styles.editBtn}
+                onClick={() => setEditRoom(room)}
+                aria-label={`Edit ${room.name}`}
+              >
+                <Edit2 size={14} />
+              </button>
+            </Tooltip>
           </div>
         ))}
       </div>

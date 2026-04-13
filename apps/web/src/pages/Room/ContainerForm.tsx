@@ -28,6 +28,7 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -69,6 +70,19 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to delete container');
       setIsDeleting(false);
+    }
+  }
+
+  async function handleDuplicate() {
+    if (!container) return;
+    setIsDuplicating(true);
+    try {
+      await api.post(`/containers/${container.id}/duplicate`, {});
+      onSaved();
+      onClose();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to duplicate container');
+      setIsDuplicating(false);
     }
   }
 
@@ -121,14 +135,24 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
 
         <div className={formStyles.actions}>
           {isEdit && (
-            <button
-              type="button"
-              className={formStyles.deleteBtn}
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? '…' : 'Delete'}
-            </button>
+            <>
+              <button
+                type="button"
+                className={formStyles.deleteBtn}
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? '…' : 'Delete'}
+              </button>
+              <button
+                type="button"
+                className={formStyles.duplicateBtn}
+                onClick={handleDuplicate}
+                disabled={isDuplicating}
+              >
+                {isDuplicating ? '…' : 'Duplicate'}
+              </button>
+            </>
           )}
           <button type="submit" className={formStyles.submitBtn} disabled={isSaving}>
             {isSaving ? 'Saving…' : isEdit ? 'Save changes' : 'Create'}

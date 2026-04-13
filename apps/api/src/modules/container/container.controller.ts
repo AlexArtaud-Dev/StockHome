@@ -57,6 +57,11 @@ export class ContainerController {
     return this.containerService.update(id, dto, user.householdId);
   }
 
+  @Post(':id/duplicate')
+  duplicate(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.containerService.duplicate(id, user.householdId);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {

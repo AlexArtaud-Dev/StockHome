@@ -93,9 +93,30 @@ async function tryRefreshToken(): Promise<boolean> {
   }
 }
 
+async function requestForm<T>(path: string, formData: FormData): Promise<T> {
+  const headers: Record<string, string> = {};
+  const token = localStorage.getItem('accessToken');
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const response = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Upload failed' }));
+    throw new ApiError(response.status, (err as { error: string }).error ?? 'Upload failed');
+  }
+
+  const json = await response.json() as { data: T };
+  return json.data;
+}
+
 export const api = {
   get: <T>(path: string, signal?: AbortSignal) => request<T>(path, { signal }),
   post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
+  postForm: <T>(path: string, formData: FormData) => requestForm<T>(path, formData),
   put: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PUT', body }),
   patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
   delete: <T = void>(path: string) => request<T>(path, { method: 'DELETE' }),

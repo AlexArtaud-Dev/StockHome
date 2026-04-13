@@ -32,6 +32,7 @@ export interface Room {
   name: string;
   icon: string | null;
   color: string | null;
+  photoPath: string | null;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;

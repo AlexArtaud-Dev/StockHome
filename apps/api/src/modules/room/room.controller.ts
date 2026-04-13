@@ -44,6 +44,11 @@ export class RoomController {
     return this.roomService.update(id, dto, user.householdId);
   }
 
+  @Post(':id/duplicate')
+  duplicate(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.roomService.duplicate(id, user.householdId);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {

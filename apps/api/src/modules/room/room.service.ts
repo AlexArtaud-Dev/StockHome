@@ -34,6 +34,7 @@ export class RoomService {
       name: dto.name,
       icon: dto.icon ?? null,
       color: dto.color ?? null,
+      photoPath: dto.photoPath ?? null,
       sortOrder: dto.sortOrder ?? 0,
     });
     await this.roomRepo.save(room);
@@ -46,6 +47,22 @@ export class RoomService {
     Object.assign(room, dto);
     await this.roomRepo.save(room);
     return this.toDto(room);
+  }
+
+  async duplicate(id: string, householdId: string): Promise<Room> {
+    const room = await this.roomRepo.findOneBy({ id, householdId });
+    if (!room) throw new NotFoundException('Room not found');
+    const copy = this.roomRepo.create({
+      id: uuidv4(),
+      householdId,
+      name: `${room.name} (copy)`,
+      icon: room.icon,
+      color: room.color,
+      photoPath: room.photoPath,
+      sortOrder: room.sortOrder,
+    });
+    await this.roomRepo.save(copy);
+    return this.toDto(copy);
   }
 
   async remove(id: string, householdId: string): Promise<void> {
@@ -61,6 +78,7 @@ export class RoomService {
       name: room.name,
       icon: room.icon,
       color: room.color,
+      photoPath: room.photoPath ?? null,
       sortOrder: room.sortOrder,
       createdAt: room.createdAt.toISOString(),
       updatedAt: room.updatedAt.toISOString(),

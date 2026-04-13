@@ -12,6 +12,8 @@ export interface SearchResult {
   quantity: number;
   icon: string | null;
   isConsumable: boolean;
+  roomName: string;
+  containerName: string | null;
 }
 
 @Injectable()
@@ -32,13 +34,17 @@ export class SearchService {
       `
       SELECT i.id, i.name, i.description, i.containerId,
              i.roomId, i.householdId,
-             i.quantity, i.icon, i.isConsumable
+             i.quantity, i.icon, i.isConsumable,
+             r.name as roomName,
+             c.name as containerName
       FROM item i
+      LEFT JOIN room r ON r.id = i.roomId
+      LEFT JOIN container c ON c.id = i.containerId
       WHERE i.rowid IN (
         SELECT rowid FROM item_fts WHERE item_fts MATCH ?
       )
       AND i.householdId = ?
-      ORDER BY i.name
+      ORDER BY r.name ASC, c.name ASC, i.name ASC
       LIMIT 50
       `,
       [`"${sanitized}"*`, householdId],

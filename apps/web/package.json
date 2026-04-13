@@ -8,6 +8,8 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
     "@stockhome/shared": "*",
     "html5-qrcode": "^2.3.8",
     "jsqr": "^1.4.0",
@@ -15,7 +17,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-qr-code": "^2.0.18",
-    "react-router-dom": "^6.21.3"
+    "react-router-dom": "^6.21.3",
+    "react-select": "^5.10.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.48",

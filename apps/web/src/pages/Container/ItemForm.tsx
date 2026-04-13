@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import React, { useState } from 'react';
+import CreatableSelect from 'react-select/creatable';
 import { Modal } from '../../components/Modal/Modal';
 import { api, ApiError } from '../../services/api';
 import { Item } from '@stockhome/shared';
@@ -13,6 +13,77 @@ interface Props {
   onSaved: () => void;
 }
 
+type TagOption = { label: string; value: string };
+
+const selectStyles = {
+  control: (base: object, state: { isFocused: boolean }) => ({
+    ...base,
+    backgroundColor: 'var(--color-bg-elevated)',
+    borderColor: state.isFocused ? 'var(--color-primary)' : 'var(--color-border)',
+    borderWidth: '1.5px',
+    borderRadius: '8px',
+    boxShadow: state.isFocused ? '0 0 0 3px rgba(99,102,241,0.15)' : 'none',
+    minHeight: '44px',
+    '&:hover': { borderColor: 'var(--color-border-strong)' },
+  }),
+  menu: (base: object) => ({
+    ...base,
+    backgroundColor: 'var(--color-bg-elevated)',
+    border: '1px solid var(--color-border)',
+    borderRadius: '8px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+    zIndex: 9999,
+  }),
+  option: (base: object, state: { isFocused: boolean }) => ({
+    ...base,
+    backgroundColor: state.isFocused ? 'rgba(99,102,241,0.08)' : 'transparent',
+    color: 'var(--color-text)',
+    cursor: 'pointer',
+    ':active': { backgroundColor: 'rgba(99,102,241,0.12)' },
+  }),
+  multiValue: (base: object) => ({
+    ...base,
+    backgroundColor: 'rgba(99,102,241,0.1)',
+    borderRadius: '100px',
+    border: '1px solid rgba(99,102,241,0.25)',
+  }),
+  multiValueLabel: (base: object) => ({
+    ...base,
+    color: 'var(--color-primary)',
+    fontWeight: '600',
+    fontSize: '12px',
+    paddingLeft: '8px',
+    paddingRight: '4px',
+  }),
+  multiValueRemove: (base: object) => ({
+    ...base,
+    color: 'var(--color-primary)',
+    opacity: 0.55,
+    borderRadius: '0 100px 100px 0',
+    paddingRight: '6px',
+    ':hover': {
+      backgroundColor: 'rgba(99,102,241,0.2)',
+      color: 'var(--color-primary)',
+      opacity: 1,
+    },
+  }),
+  input: (base: object) => ({
+    ...base,
+    color: 'var(--color-text)',
+    fontFamily: 'var(--font-sans)',
+  }),
+  placeholder: (base: object) => ({
+    ...base,
+    color: 'var(--color-text-subtle)',
+    fontSize: 'var(--font-size-sm)',
+  }),
+  noOptionsMessage: (base: object) => ({
+    ...base,
+    color: 'var(--color-text-muted)',
+    fontSize: 'var(--font-size-sm)',
+  }),
+};
+
 export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props) {
   const isEdit = Boolean(item);
   const [name, setName] = useState(item?.name ?? '');
@@ -20,27 +91,16 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
   const [quantity, setQuantity] = useState(String(item?.quantity ?? 1));
   const [isConsumable, setIsConsumable] = useState(item?.isConsumable ?? false);
   const [minQuantity, setMinQuantity] = useState(String(item?.stockRule?.minQuantity ?? ''));
-  const [tags, setTags] = useState<string[]>(item?.tags?.map((t) => t.name) ?? []);
-  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState<TagOption[]>(
+    item?.tags?.map((t) => ({ label: t.name, value: t.name })) ?? [],
+  );
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const tagInputRef = useRef<HTMLInputElement>(null);
-
-  function addTag(raw: string) {
-    const val = raw.trim();
-    if (val && !tags.includes(val)) setTags((prev) => [...prev, val]);
-    setTagInput('');
-  }
-
-  function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(tagInput); }
-    else if (e.key === 'Backspace' && tagInput === '' && tags.length > 0) setTags((prev) => prev.slice(0, -1));
-  }
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (tagInput.trim()) addTag(tagInput);
     setError(null);
     setIsSaving(true);
     try {
@@ -48,6 +108,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
 
       const parsedQty = parseInt(quantity, 10);
       const safeQty = Number.isNaN(parsedQty) ? 1 : Math.max(0, parsedQty);
+      const tagNames = tags.map((t) => t.value);
 
       if (isEdit && item) {
         await api.patch(`/items/${item.id}`, {
@@ -55,7 +116,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
           description: description || null,
           quantity: safeQty,
           isConsumable,
-          tagNames: tags,
+          tagNames,
           containerId,
         });
         savedId = item.id;
@@ -65,14 +126,13 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
           description: description || null,
           quantity: safeQty,
           isConsumable,
-          tagNames: tags,
+          tagNames,
           containerId,
           roomId,
         });
         savedId = created.id;
       }
 
-      // Upsert stock rule when consumable with a minQuantity
       if (isConsumable && minQuantity !== '') {
         const min = parseInt(minQuantity, 10);
         if (!isNaN(min) && min >= 0) {
@@ -100,6 +160,19 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to delete item');
       setIsDeleting(false);
+    }
+  }
+
+  async function handleDuplicate() {
+    if (!item) return;
+    setIsDuplicating(true);
+    try {
+      await api.post(`/items/${item.id}/duplicate`, {});
+      onSaved();
+      onClose();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to duplicate item');
+      setIsDuplicating(false);
     }
   }
 
@@ -144,37 +217,18 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
 
         <div className={formStyles.field}>
           <label>Tags</label>
-          <div
-            className={formStyles.tagInput}
-            onClick={() => tagInputRef.current?.focus()}
-          >
-            {tags.map((tag) => (
-              <span key={tag} className={formStyles.tag}>
-                {tag}
-                <span
-                  className={formStyles.tagRemove}
-                  onClick={() => setTags((prev) => prev.filter((t) => t !== tag))}
-                  role="button"
-                  aria-label={`Remove ${tag}`}
-                >
-                  <X size={11} />
-                </span>
-              </span>
-            ))}
-            <input
-              ref={tagInputRef}
-              className={formStyles.tagRawInput}
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              onBlur={() => { if (tagInput.trim()) addTag(tagInput); }}
-              placeholder={tags.length === 0 ? 'Add tags…' : ''}
-            />
-          </div>
-          <span className={formStyles.hint}>Press Enter or comma to add a tag</span>
+          <CreatableSelect
+            isMulti
+            isClearable={false}
+            value={tags}
+            onChange={(vals) => setTags(vals as TagOption[])}
+            placeholder="Add tags…"
+            formatCreateLabel={(input) => `Add "${input}"`}
+            noOptionsMessage={() => 'Type to add a tag'}
+            styles={selectStyles as object}
+          />
         </div>
 
-        {/* Consumable toggle */}
         <div
           className={formStyles.checkRow}
           onClick={() => setIsConsumable((v) => !v)}
@@ -191,7 +245,6 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
           </label>
         </div>
 
-        {/* Minimum stock — shown only when consumable */}
         {isConsumable && (
           <div className={formStyles.subSection}>
             <div className={formStyles.field}>
@@ -213,14 +266,24 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
 
         <div className={formStyles.actions}>
           {isEdit && (
-            <button
-              type="button"
-              className={formStyles.deleteBtn}
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? '…' : 'Delete'}
-            </button>
+            <>
+              <button
+                type="button"
+                className={formStyles.deleteBtn}
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? '…' : 'Delete'}
+              </button>
+              <button
+                type="button"
+                className={formStyles.duplicateBtn}
+                onClick={handleDuplicate}
+                disabled={isDuplicating}
+              >
+                {isDuplicating ? '…' : 'Duplicate'}
+              </button>
+            </>
           )}
           <button type="submit" className={formStyles.submitBtn} disabled={isSaving}>
             {isSaving ? 'Saving…' : isEdit ? 'Save changes' : 'Add item'}
