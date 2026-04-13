@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useHousehold } from '../../context/HouseholdContext';
 import { api, ApiError } from '../../services/api';
@@ -8,6 +9,7 @@ import styles from './NoHousehold.module.css';
 export function NoHouseholdPage() {
   const { user, logout } = useAuth();
   const { refreshHouseholds } = useHousehold();
+  const navigate = useNavigate();
 
   const [tab, setTab] = useState<'create' | 'join'>('create');
 
@@ -37,6 +39,7 @@ export function NoHouseholdPage() {
     try {
       await api.post<Household>('/households', { name });
       await refreshHouseholds();
+      navigate('/');
     } catch (err) {
       setCreateError(err instanceof ApiError ? err.message : 'Failed to create household');
     } finally {
@@ -50,6 +53,7 @@ export function NoHouseholdPage() {
     try {
       await api.post(`/invitations/${invitationId}/accept`);
       await refreshHouseholds();
+      navigate('/');
     } catch (err) {
       setActionError(err instanceof ApiError ? err.message : 'Failed to accept invitation');
       setActionLoading(null);
