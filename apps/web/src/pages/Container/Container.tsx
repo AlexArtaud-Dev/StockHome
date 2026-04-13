@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Box, ChevronRight, Edit2, Package, Plus, QrCode, X } from 'lucide-react';
+import { Tooltip } from '../../components/Tooltip/Tooltip';
 import QRCodeSVG from 'react-qr-code';
 import { Layout } from '../../components/Layout/Layout';
 import { Modal } from '../../components/Modal/Modal';
@@ -61,18 +62,26 @@ export function ContainerPage() {
       showBack
       actions={
         <>
-          <button className={styles.iconBtn} onClick={() => setShowQr(true)} aria-label="Show QR code">
-            <QrCode size={18} />
-          </button>
-          <button className={styles.iconBtn} onClick={() => setShowAddSubContainer(true)} aria-label="Add sub-container">
-            <Box size={18} />
-          </button>
-          <button className={styles.iconBtn} onClick={() => setShowEditContainer(true)} aria-label="Edit container">
-            <Edit2 size={18} />
-          </button>
-          <button className={styles.iconBtn} onClick={() => setShowAddItem(true)} aria-label="Add item">
-            <Plus size={20} />
-          </button>
+          <Tooltip content="QR code">
+            <button className={styles.iconBtn} onClick={() => setShowQr(true)} aria-label="Show QR code">
+              <QrCode size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Add sub-container">
+            <button className={styles.iconBtn} onClick={() => setShowAddSubContainer(true)} aria-label="Add sub-container">
+              <Box size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Edit container">
+            <button className={styles.iconBtn} onClick={() => setShowEditContainer(true)} aria-label="Edit container">
+              <Edit2 size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content="Add item">
+            <button className={styles.iconBtn} onClick={() => setShowAddItem(true)} aria-label="Add item">
+              <Plus size={20} />
+            </button>
+          </Tooltip>
         </>
       }
     >
@@ -166,14 +175,17 @@ export function ContainerPage() {
             </div>
             <p className={styles.qrUrl}>{qrUrl}</p>
             <button className={styles.qrDownload} onClick={() => {
-              const qrSvgEl = document.getElementById('qr-svg') as SVGElement | null;
+              // react-qr-code sets viewBox="0 0 {moduleCount} {moduleCount}" (e.g. 29×29),
+              // not pixel coordinates. Cloning the full SVG element and nesting it
+              // preserves its own viewBox so it renders at the correct size.
+              const qrSvgEl = document.getElementById('qr-svg') as SVGSVGElement | null;
               if (!qrSvgEl) return;
-              const padding = 16;
+              const padding = 20;
               const qrSize = 220;
-              const fontSize = 16;
-              const textH = fontSize + 12;
+              const fontSize = 18;
+              const labelH = fontSize + 20;
               const totalW = qrSize + padding * 2;
-              const totalH = qrSize + padding * 2 + textH;
+              const totalH = qrSize + padding * 2 + labelH;
               const svgNs = 'http://www.w3.org/2000/svg';
               const wrapper = document.createElementNS(svgNs, 'svg');
               wrapper.setAttribute('xmlns', svgNs);
@@ -185,13 +197,17 @@ export function ContainerPage() {
               bg.setAttribute('height', String(totalH));
               bg.setAttribute('fill', 'white');
               wrapper.appendChild(bg);
-              const g = document.createElementNS(svgNs, 'g');
-              g.setAttribute('transform', `translate(${padding}, ${padding})`);
-              g.innerHTML = qrSvgEl.innerHTML;
-              wrapper.appendChild(g);
+              // Clone the full QR SVG (preserves viewBox + width + height),
+              // then position it as a nested <svg> at (padding, padding)
+              const qrClone = qrSvgEl.cloneNode(true) as SVGSVGElement;
+              qrClone.setAttribute('x', String(padding));
+              qrClone.setAttribute('y', String(padding));
+              qrClone.setAttribute('width', String(qrSize));
+              qrClone.setAttribute('height', String(qrSize));
+              wrapper.appendChild(qrClone);
               const text = document.createElementNS(svgNs, 'text');
               text.setAttribute('x', String(totalW / 2));
-              text.setAttribute('y', String(qrSize + padding * 2 + fontSize - 2));
+              text.setAttribute('y', String(qrSize + padding * 2 + fontSize));
               text.setAttribute('text-anchor', 'middle');
               text.setAttribute('font-family', 'Inter, system-ui, sans-serif');
               text.setAttribute('font-size', String(fontSize));

@@ -26,15 +26,19 @@ export class SearchService {
 
     // FTS5 search via raw query
     const sanitized = query.replace(/["']/g, '');
+    // FTS5 virtual-table MATCH requires the literal table name — aliasing it
+    // causes "no such column" errors. Use a correlated subquery instead.
     const rows = await this.dataSource.query<SearchResult[]>(
       `
       SELECT i.id, i.name, i.description, i.containerId,
              i.roomId, i.householdId,
              i.quantity, i.icon, i.isConsumable
       FROM item i
-      INNER JOIN item_fts fts ON fts.rowid = i.rowid
-      WHERE fts MATCH ? AND i.householdId = ?
-      ORDER BY rank
+      WHERE i.rowid IN (
+        SELECT rowid FROM item_fts WHERE item_fts MATCH ?
+      )
+      AND i.householdId = ?
+      ORDER BY i.name
       LIMIT 50
       `,
       [`"${sanitized}"*`, householdId],

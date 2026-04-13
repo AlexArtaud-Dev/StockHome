@@ -176,12 +176,13 @@
 
 /* ── Empty ─────────────────────────────────────────────────────────── */
 .empty {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
-  padding: var(--space-12) var(--space-6);
+  padding: var(--space-8) var(--space-6);
   color: var(--color-text-muted);
   text-align: center;
 }

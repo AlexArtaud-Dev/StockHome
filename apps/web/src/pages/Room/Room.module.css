@@ -14,12 +14,14 @@
 .errorMsg { color: var(--color-danger); padding: var(--space-4); text-align: center; }
 
 .empty {
-  text-align: center;
-  padding: var(--space-12) var(--space-4);
-  color: var(--color-text-muted);
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-muted);
   gap: var(--space-3);
 }
 .emptyLink { color: var(--color-primary); font-weight: 600; }
@@ -105,6 +107,45 @@
   text-transform: capitalize;
 }
 
+/* ── Card wrapper (for stacking select + edit buttons) ─────────────── */
+.cardWrapper {
+  position: relative;
+}
+
+.cardSelected {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+  transform: none !important;
+}
+
+/* ── Select checkbox button ─────────────────────────────────────────── */
+.selectBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-subtle);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 2;
+  opacity: 0;
+}
+
+.cardWrapper:hover .selectBtn { opacity: 1; }
+
+.selectBtnActive {
+  opacity: 1 !important;
+  color: var(--color-primary);
+  background-color: rgba(99, 102, 241, 0.12);
+}
+
+.selectBtn:hover { background-color: rgba(99, 102, 241, 0.12); color: var(--color-primary); }
+
+/* ── Edit button ────────────────────────────────────────────────────── */
 .editBtn {
   display: flex;
   align-items: center;
@@ -118,5 +159,76 @@
   top: var(--space-3);
   right: var(--space-3);
   z-index: 1;
+  opacity: 0;
 }
+.cardWrapper:hover .editBtn { opacity: 1; }
 .editBtn:hover { background-color: rgba(99, 102, 241, 0.08); color: var(--color-text); }
+
+/* ── Selection bar ──────────────────────────────────────────────────── */
+.selectionBar {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--space-3));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-bg-elevated);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+  z-index: 150;
+  animation: barIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+@keyframes barIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.selectionCount {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.selectionActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.selectionBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: opacity var(--transition-fast);
+}
+.selectionBtn:hover { opacity: 0.88; }
+
+.selectionClear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.selectionClear:hover { background-color: var(--color-bg-sunken); color: var(--color-text); }
+
+@media (min-width: 1024px) {
+  .selectionBar {
+    bottom: var(--space-6);
+    left: calc(var(--sidebar-width) + 50%);
+  }
+}

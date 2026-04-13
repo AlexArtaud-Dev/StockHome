@@ -46,11 +46,14 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
     try {
       let savedId: string;
 
+      const parsedQty = parseInt(quantity, 10);
+      const safeQty = Number.isNaN(parsedQty) ? 1 : Math.max(0, parsedQty);
+
       if (isEdit && item) {
         await api.patch(`/items/${item.id}`, {
           name,
           description: description || null,
-          quantity: parseInt(quantity, 10) || 1,
+          quantity: safeQty,
           isConsumable,
           tagNames: tags,
           containerId,
@@ -60,7 +63,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
         const created = await api.post<Item>('/items', {
           name,
           description: description || null,
-          quantity: parseInt(quantity, 10) || 1,
+          quantity: safeQty,
           isConsumable,
           tagNames: tags,
           containerId,
