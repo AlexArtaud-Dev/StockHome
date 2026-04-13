@@ -25,8 +25,9 @@ export class ItemController {
   findAll(
     @CurrentUser() user: JwtPayload,
     @Query('containerId') containerId?: string,
+    @Query('roomId') roomId?: string,
   ) {
-    return this.itemService.findAll(user.householdId, containerId);
+    return this.itemService.findAll(user.householdId, containerId, roomId);
   }
 
   @Get(':id')

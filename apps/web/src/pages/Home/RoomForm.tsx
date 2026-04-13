@@ -3,11 +3,18 @@ import { Modal } from '../../components/Modal/Modal';
 import { api, ApiError } from '../../services/api';
 import { Room } from '@stockhome/shared';
 import formStyles from '../../components/Form/Form.module.css';
+import styles from './RoomForm.module.css';
 
 const PRESET_COLORS = [
   '#4f46e5', '#7c3aed', '#db2777', '#dc2626',
   '#ea580c', '#ca8a04', '#16a34a', '#0891b2',
   '#475569', '#78716c',
+];
+
+const PRESET_ICONS = [
+  '🏠', '🛋️', '🛏️', '🍳', '🚿', '🧺', '🪴',
+  '🔧', '🚗', '📦', '🗄️', '🏋️', '📚', '🧸',
+  '🌿', '🏡', '🪟', '🚪', '💻', '🎮',
 ];
 
 interface Props {
@@ -20,6 +27,7 @@ export function RoomForm({ room, onClose, onSaved }: Props) {
   const isEdit = Boolean(room);
   const [name, setName] = useState(room?.name ?? '');
   const [color, setColor] = useState(room?.color ?? PRESET_COLORS[0]!);
+  const [icon, setIcon] = useState<string>(room?.icon ?? '');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -29,10 +37,11 @@ export function RoomForm({ room, onClose, onSaved }: Props) {
     setError(null);
     setIsSaving(true);
     try {
+      const payload = { name, color, icon: icon || null };
       if (isEdit && room) {
-        await api.patch(`/rooms/${room.id}`, { name, color });
+        await api.patch(`/rooms/${room.id}`, payload);
       } else {
-        await api.post('/rooms', { name, color });
+        await api.post('/rooms', payload);
       }
       onSaved();
       onClose();
@@ -73,6 +82,31 @@ export function RoomForm({ room, onClose, onSaved }: Props) {
             autoFocus
             required
           />
+        </div>
+
+        <div className={formStyles.field}>
+          <label>Icon <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>(optional)</span></label>
+          <div className={styles.iconGrid}>
+            <button
+              type="button"
+              className={`${styles.iconOption} ${icon === '' ? styles.iconSelected : ''}`}
+              onClick={() => setIcon('')}
+              aria-label="No icon"
+            >
+              <span style={{ color: 'var(--color-text-subtle)', fontSize: '0.75rem' }}>None</span>
+            </button>
+            {PRESET_ICONS.map((ic) => (
+              <button
+                key={ic}
+                type="button"
+                className={`${styles.iconOption} ${icon === ic ? styles.iconSelected : ''}`}
+                onClick={() => setIcon(ic)}
+                aria-label={`Select icon ${ic}`}
+              >
+                {ic}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className={formStyles.field}>

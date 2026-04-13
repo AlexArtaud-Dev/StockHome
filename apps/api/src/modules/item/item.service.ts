@@ -26,7 +26,7 @@ export class ItemService {
     private readonly roomRepo: Repository<RoomEntity>,
   ) {}
 
-  async findAll(householdId: string, containerId?: string): Promise<Item[]> {
+  async findAll(householdId: string, containerId?: string, roomId?: string): Promise<Item[]> {
     const qb = this.itemRepo
       .createQueryBuilder('i')
       .leftJoinAndSelect('i.categories', 'cat')
@@ -36,6 +36,10 @@ export class ItemService {
 
     if (containerId) {
       qb.andWhere('i.containerId = :containerId', { containerId });
+    }
+
+    if (roomId) {
+      qb.andWhere('i.roomId = :roomId', { roomId });
     }
 
     const items = await qb.orderBy('i.name', 'ASC').getMany();

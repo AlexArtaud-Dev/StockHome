@@ -8,7 +8,7 @@
   color: var(--color-text-muted);
   transition: background-color var(--transition-fast), color var(--transition-fast);
 }
-.iconBtn:hover { background-color: var(--color-bg-hover); color: var(--color-text); }
+.iconBtn:hover { background-color: rgba(99, 102, 241, 0.08); color: var(--color-text); }
 
 .loading { color: var(--color-text-muted); padding: var(--space-8); text-align: center; }
 .errorMsg { color: var(--color-danger); padding: var(--space-4); text-align: center; }
@@ -119,4 +119,4 @@
   right: var(--space-3);
   z-index: 1;
 }
-.editBtn:hover { background-color: var(--color-bg-hover); color: var(--color-text); }
+.editBtn:hover { background-color: rgba(99, 102, 241, 0.08); color: var(--color-text); }

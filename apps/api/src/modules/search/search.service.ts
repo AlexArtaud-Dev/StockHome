@@ -28,12 +28,12 @@ export class SearchService {
     const sanitized = query.replace(/["']/g, '');
     const rows = await this.dataSource.query<SearchResult[]>(
       `
-      SELECT i.id, i.name, i.description, i.container_id as containerId,
-             i.room_id as roomId, i.household_id as householdId,
-             i.quantity, i.icon, i.is_consumable as isConsumable
+      SELECT i.id, i.name, i.description, i.containerId,
+             i.roomId, i.householdId,
+             i.quantity, i.icon, i.isConsumable
       FROM item i
       INNER JOIN item_fts fts ON fts.rowid = i.rowid
-      WHERE fts MATCH ? AND i.household_id = ?
+      WHERE fts MATCH ? AND i.householdId = ?
       ORDER BY rank
       LIMIT 50
       `,

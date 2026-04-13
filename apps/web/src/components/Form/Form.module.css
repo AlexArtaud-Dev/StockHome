@@ -211,22 +211,38 @@
 .tag {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 3px var(--space-2);
-  background-color: var(--color-primary-light);
+  gap: 4px;
+  padding: 4px 10px 4px 10px;
+  background-color: rgba(99, 102, 241, 0.1);
   color: var(--color-primary);
+  border: 1px solid rgba(99, 102, 241, 0.25);
   border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
+  font-size: 12px;
   font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background-color var(--transition-fast);
+}
+.tag:hover {
+  background-color: rgba(99, 102, 241, 0.16);
 }
 .tagRemove {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
   color: var(--color-primary);
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast);
 }
-.tagRemove:hover { opacity: 1; }
+.tagRemove:hover {
+  opacity: 1;
+  background-color: rgba(99, 102, 241, 0.2);
+}
 
 .tagRawInput {
   border: none;

@@ -160,14 +160,46 @@ export function ContainerPage() {
         <Modal title="Container QR Code" onClose={() => setShowQr(false)}>
           <div className={styles.qrModal}>
             <p className={styles.qrDesc}>Scan to open <strong>{container.name}</strong> on any device.</p>
-            <div className={styles.qrWrapper}>
-              <QRCodeSVG value={qrUrl} size={220} level="M" />
+            <div className={styles.qrWrapper} id="qr-wrapper">
+              <QRCodeSVG value={qrUrl} size={220} level="M" id="qr-svg" />
+              <p className={styles.qrName}>{container.name}</p>
             </div>
             <p className={styles.qrUrl}>{qrUrl}</p>
             <button className={styles.qrDownload} onClick={() => {
-              const svg = document.querySelector(`.${styles.qrWrapper} svg`);
-              if (!svg) return;
-              const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+              const qrSvgEl = document.getElementById('qr-svg') as SVGElement | null;
+              if (!qrSvgEl) return;
+              const padding = 16;
+              const qrSize = 220;
+              const fontSize = 16;
+              const textH = fontSize + 12;
+              const totalW = qrSize + padding * 2;
+              const totalH = qrSize + padding * 2 + textH;
+              const svgNs = 'http://www.w3.org/2000/svg';
+              const wrapper = document.createElementNS(svgNs, 'svg');
+              wrapper.setAttribute('xmlns', svgNs);
+              wrapper.setAttribute('width', String(totalW));
+              wrapper.setAttribute('height', String(totalH));
+              wrapper.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+              const bg = document.createElementNS(svgNs, 'rect');
+              bg.setAttribute('width', String(totalW));
+              bg.setAttribute('height', String(totalH));
+              bg.setAttribute('fill', 'white');
+              wrapper.appendChild(bg);
+              const g = document.createElementNS(svgNs, 'g');
+              g.setAttribute('transform', `translate(${padding}, ${padding})`);
+              g.innerHTML = qrSvgEl.innerHTML;
+              wrapper.appendChild(g);
+              const text = document.createElementNS(svgNs, 'text');
+              text.setAttribute('x', String(totalW / 2));
+              text.setAttribute('y', String(qrSize + padding * 2 + fontSize - 2));
+              text.setAttribute('text-anchor', 'middle');
+              text.setAttribute('font-family', 'Inter, system-ui, sans-serif');
+              text.setAttribute('font-size', String(fontSize));
+              text.setAttribute('font-weight', '700');
+              text.setAttribute('fill', '#1e293b');
+              text.textContent = container.name;
+              wrapper.appendChild(text);
+              const blob = new Blob([wrapper.outerHTML], { type: 'image/svg+xml' });
               const a = document.createElement('a');
               a.href = URL.createObjectURL(blob);
               a.download = `${container.name}-qr.svg`;

@@ -48,7 +48,10 @@ export function HomePage() {
                 className={styles.roomColor}
                 style={{ backgroundColor: room.color ?? 'var(--color-primary)' }}
               />
-              <div className={styles.roomName}>{room.name}</div>
+              <div className={styles.roomName}>
+                {room.icon && <span className={styles.roomIcon}>{room.icon}</span>}
+                {room.name}
+              </div>
             </Link>
             <button
               className={styles.editBtn}

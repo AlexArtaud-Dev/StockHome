@@ -79,9 +79,16 @@
   flex: 1;
   display: flex;
   align-items: center;
+  gap: var(--space-2);
   padding: var(--space-4);
   font-weight: 600;
   font-size: var(--font-size-md);
+}
+
+.roomIcon {
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .roomWrapper {
