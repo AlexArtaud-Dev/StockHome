@@ -30,6 +30,7 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
   const { user } = useAuth();
   const { households, selectedHousehold, setSelectedHousehold, hasHousehold } = useHousehold();
   const [showHouseholdDropdown, setShowHouseholdDropdown] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   return (
     <div className={styles.shell}>
@@ -73,7 +74,8 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
           <span>{t('nav.home')}</span>
         </NavLink>
 
-        <NavLink to="/search" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
+        {/* Search — desktop sidebar only; on mobile it lives in the header */}
+        <NavLink to="/search" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
           <Search size={20} />
           <span>{t('nav.search')}</span>
         </NavLink>
@@ -110,15 +112,54 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
 
       <div className={styles.mainArea}>
         {title !== undefined && (
-          <header className={styles.header}>
-            {showBack && (
-              <button className={styles.headerBack} onClick={() => navigate(-1)} aria-label={t('common.back')}>
-                <ArrowLeft size={20} />
-              </button>
+          <>
+            <header className={styles.header}>
+              {showBack && (
+                <button className={styles.headerBack} onClick={() => navigate(-1)} aria-label={t('common.back')}>
+                  <ArrowLeft size={20} />
+                </button>
+              )}
+              <h1 className={styles.headerTitle}>{title}</h1>
+              {actions && <div className={styles.headerActions}>{actions}</div>}
+              {/* Search icon — mobile only */}
+              {hasHousehold && (
+                <button
+                  className={styles.mobileSearchBtn}
+                  aria-label={t('nav.search')}
+                  onClick={() => {
+                    if (showMobileSearch) {
+                      setShowMobileSearch(false);
+                    } else {
+                      setShowMobileSearch(true);
+                    }
+                  }}
+                >
+                  <Search size={20} />
+                </button>
+              )}
+            </header>
+            {/* Expandable mobile search bar */}
+            {showMobileSearch && (
+              <div className={styles.mobileSearchBar}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const val = (e.currentTarget.elements.namedItem('q') as HTMLInputElement).value.trim();
+                    if (val) navigate(`/search?q=${encodeURIComponent(val)}`);
+                    setShowMobileSearch(false);
+                  }}
+                >
+                  <input
+                    name="q"
+                    type="search"
+                    className={styles.mobileSearchInput}
+                    placeholder={t('nav.search') + '…'}
+                    autoFocus
+                  />
+                </form>
+              </div>
             )}
-            <h1 className={styles.headerTitle}>{title}</h1>
-            {actions && <div className={styles.headerActions}>{actions}</div>}
-          </header>
+          </>
         )}
         <main className={styles.content}>{children}</main>
       </div>
