@@ -1,8 +1,10 @@
 services:
   api:
-    image: ghcr.io/alexartaud-dev/stockhome-api:latest  # must stay lowercase
+    image: ghcr.io/alexartaud-dev/stockhome-api:latest
+    ports:
+      - "${API_PORT:-3001}:3001"
     volumes:
-      - stockhome_data:/app/data
+      - /srv/dev-disk-by-uuid-52a37ca8-c942-4d82-9756-e6d027d1eab9/appdata/stockhome/data:/app/data
     env_file:
       - stack.env
     environment:
@@ -24,7 +26,7 @@ services:
       - SMTP_FROM=${SMTP_FROM}
     restart: unless-stopped
     networks:
-      - stockhome_net
+      - bifrost
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/v1/health"]
       interval: 30s
@@ -32,7 +34,7 @@ services:
       retries: 3
 
   web:
-    image: ghcr.io/alexartaud-dev/stockhome-web:latest  # must stay lowercase
+    image: ghcr.io/alexartaud-dev/stockhome-web:latest
     ports:
       - "${APP_PORT:-3000}:80"
     depends_on:
@@ -40,12 +42,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - stockhome_net
-
-volumes:
-  stockhome_data:
-    driver: local
+      - bifrost
 
 networks:
-  stockhome_net:
-    driver: bridge
+  bifrost:
+    external: true
