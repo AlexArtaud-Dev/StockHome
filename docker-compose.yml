@@ -3,10 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-    # API is only reachable internally via the stockhome_net network.
-    # Do NOT expose port 3001 to the host — the nginx proxy handles all traffic.
     volumes:
       - stockhome_data:/app/data
+    env_file:
+      - stack.env
     environment:
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET}
@@ -14,17 +14,16 @@ services:
       - DB_PATH=/app/data/stockhome.db
       - UPLOAD_DIR=/app/data/uploads
       - PORT=3001
-      - MAX_CONTAINER_DEPTH=${MAX_CONTAINER_DEPTH:-3}
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
-      - FIRST_LAUNCH=${FIRST_LAUNCH:-false}
-      - APP_URL=${APP_URL:-http://localhost:3000}
-      # SMTP — leave blank to fall back to console mock (no real emails sent)
-      - SMTP_HOST=${SMTP_HOST:-}
-      - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_SECURE=${SMTP_SECURE:-false}
-      - SMTP_USER=${SMTP_USER:-}
-      - SMTP_PASS=${SMTP_PASS:-}
-      - SMTP_FROM=${SMTP_FROM:-noreply@stockhome.app}
+      - MAX_CONTAINER_DEPTH=${MAX_CONTAINER_DEPTH}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - FIRST_LAUNCH=${FIRST_LAUNCH}
+      - APP_URL=${APP_URL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
     restart: unless-stopped
     networks:
       - stockhome_net
