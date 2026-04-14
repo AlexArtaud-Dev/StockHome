@@ -31,6 +31,11 @@ export class ItemController {
     return this.itemService.findAll(user.householdId!, containerId, roomId);
   }
 
+  @Get('expiring')
+  findExpiring(@CurrentUser() user: JwtPayload, @Query('days') days?: string) {
+    return this.itemService.findExpiring(parseInt(days ?? '30', 10), user.householdId!);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.itemService.findOne(id, user.householdId!);

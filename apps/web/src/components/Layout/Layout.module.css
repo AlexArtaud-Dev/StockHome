@@ -1,7 +1,8 @@
 .shell {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 /* ── Sidebar (desktop) / Bottom nav (mobile) ─────────────────────── */
@@ -143,6 +144,59 @@
 /* Search nav item — hidden on mobile, shown in desktop sidebar */
 .desktopOnly { display: none; }
 
+/* Mobile-only elements (hidden on desktop sidebar) */
+.mobileOnly { display: flex; }
+
+/* More bottom sheet (mobile only) */
+.moreOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.moreSheet {
+  position: fixed;
+  bottom: var(--nav-height);
+  left: 0;
+  right: 0;
+  z-index: 300;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.moreSheetHandle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--color-border);
+  margin: 0 auto var(--space-3);
+  flex-shrink: 0;
+}
+
+.moreSheetItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  text-decoration: none;
+  min-height: var(--touch-min);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.moreSheetItem:hover { background-color: rgba(99, 102, 241, 0.08); color: var(--color-primary); }
+.moreSheetItemActive { background-color: rgba(99, 102, 241, 0.1); color: var(--color-primary); font-weight: 600; }
+
 /* Mobile search icon in header */
 .mobileSearchBtn {
   display: flex;
@@ -165,6 +219,7 @@
   background-color: var(--color-bg-elevated);
   border-bottom: 1px solid var(--color-border);
   padding: var(--space-2) var(--space-4);
+  flex-shrink: 0;
 }
 .mobileSearchInput {
   width: 100%;
@@ -185,12 +240,11 @@
   flex-direction: column;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 /* ── Header ────────────────────────────────────────────────────────── */
 .header {
-  position: sticky;
-  top: 0;
   z-index: 100;
   height: var(--header-height);
   background-color: var(--color-bg-elevated);
@@ -200,6 +254,7 @@
   padding: 0 var(--space-5);
   gap: var(--space-3);
   box-shadow: var(--shadow-xs);
+  flex-shrink: 0;
 }
 
 .headerBack {
@@ -243,15 +298,21 @@
   flex-direction: column;
   padding: var(--space-5);
   padding-bottom: calc(var(--nav-height) + var(--space-5));
+  overflow-y: auto;
 }
 
 /* ── Desktop ≥ 1024px: sidebar layout ─────────────────────────────── */
 @media (min-width: 1024px) {
   .desktopOnly { display: flex; }
+  .mobileOnly { display: none; }
   .mobileSearchBtn { display: none; }
   .mobileSearchBar { display: none; }
+  .moreOverlay { display: none; }
+  .moreSheet { display: none; }
   .shell {
     flex-direction: row;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .nav {
@@ -340,6 +401,6 @@
     max-width: 1100px;
     width: 100%;
     margin: 0 auto;
-    min-height: calc(100dvh - var(--header-height, 60px));
+    overflow-y: auto;
   }
 }

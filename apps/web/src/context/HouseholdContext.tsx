@@ -24,12 +24,6 @@ export function HouseholdProvider({ children }: { children: React.ReactNode }) {
   const [householdsLoaded, setHouseholdsLoaded] = useState(false);
 
   const refreshHouseholds = useCallback(async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      setHouseholdsLoaded(true);
-      return;
-    }
-
     setIsLoading(true);
     try {
       const list = await api.get<Household[]>('/households');
@@ -54,7 +48,7 @@ export function HouseholdProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch {
-      // Auth errors handled by api.ts
+      // 401 → api.ts redirects to login; other errors: just mark as loaded
     } finally {
       setIsLoading(false);
       setHouseholdsLoaded(true);

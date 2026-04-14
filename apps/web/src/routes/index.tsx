@@ -18,6 +18,8 @@ import { AccountPage } from '../pages/Account/Account';
 import { AdminPage } from '../pages/Admin/Admin';
 import { BulkAddPage } from '../pages/BulkAdd/BulkAdd';
 import { MembersPage } from '../pages/Members/Members';
+import { ExpiringPage } from '../pages/Expiring/Expiring';
+import { HistoryPage } from '../pages/History/History';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -74,6 +76,8 @@ export function AppRoutes() {
       <Route path="/scan" element={<RequireHousehold><ScanPage /></RequireHousehold>} />
       <Route path="/search" element={<RequireHousehold><SearchPage /></RequireHousehold>} />
       <Route path="/shopping-list" element={<RequireHousehold><ShoppingListPage /></RequireHousehold>} />
+      <Route path="/expiring" element={<RequireHousehold><ExpiringPage /></RequireHousehold>} />
+      <Route path="/history" element={<RequireHousehold><HistoryPage /></RequireHousehold>} />
       <Route path="/settings" element={<RequireHousehold><SettingsPage /></RequireHousehold>} />
 
       {/* Account and admin — require auth only (not household) */}

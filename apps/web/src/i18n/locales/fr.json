@@ -24,7 +24,9 @@
     "scanQr": "Scanner QR",
     "shop": "Courses",
     "account": "Compte",
-    "members": "Membres"
+    "members": "Membres",
+    "expiring": "Péremption",
+    "history": "Historique"
   },
   "home": {
     "noRooms": "Aucune pièce pour l'instant.",
@@ -111,7 +113,9 @@
     "minStockPlaceholder": "ex. 2",
     "minStockHint": "L'article apparaît dans les courses quand la quantité passe sous cette valeur.",
     "addBtn": "Ajouter l'article",
-    "confirmDelete": "Supprimer « {{name}} » ?"
+    "confirmDelete": "Supprimer « {{name}} » ?",
+    "expiresAt": "Date de péremption",
+    "expiresAtHint": "Définissez une date de péremption pour recevoir des alertes à l'approche de l'expiration."
   },
   "search": {
     "title": "Recherche",
@@ -195,7 +199,14 @@
     "confirmDelete2Body": "Tapez le nom du foyer pour confirmer la suppression.",
     "confirmDeletePlaceholder": "Nom du foyer…",
     "manageMembers": "Gérer les membres",
-    "exportPdf": "Exporter en PDF"
+    "exportPdf": "Exporter en PDF",
+    "notificationsSection": "Notifications",
+    "notifyExpiry": "Alertes de péremption",
+    "notifyExpiryDays": "jours avant péremption",
+    "notifyWeeklySummary": "Récapitulatif hebdomadaire",
+    "weeklyDigestDay": "Jour du récap",
+    "saveNotifications": "Enregistrer les préférences",
+    "notifSaved": "Préférences enregistrées"
   },
   "household": {
     "createTitle": "Nouveau foyer",
@@ -275,7 +286,35 @@
     "belowMinimum": "Sous le minimum",
     "renewalDue": "Renouvellement dû",
     "currentQty": "qté : {{qty}}",
-    "minQty": "min : {{min}}"
+    "minQty": "min : {{min}}",
+    "addQty": "Quantité à ajouter",
+    "confirm": "Ajouter"
+  },
+  "expiring": {
+    "title": "Expirations proches",
+    "empty": "Aucun article n'expire bientôt !",
+    "emptyDesc": "Les articles avec une date de péremption apparaîtront ici.",
+    "expired": "Expiré",
+    "daysLeft_one": "{{count}} jour restant",
+    "daysLeft_other": "{{count}} jours restants",
+    "filter7": "7 jours",
+    "filter14": "14 jours",
+    "filter30": "30 jours",
+    "filter90": "90 jours"
+  },
+  "history": {
+    "title": "Historique des mouvements",
+    "empty": "Aucune activité pour l'instant.",
+    "emptyDesc": "Les mouvements d'articles seront enregistrés ici.",
+    "csv": "Exporter CSV",
+    "json": "Exporter JSON",
+    "actions": {
+      "created": "Créé",
+      "moved": "Déplacé",
+      "updated": "Modifié",
+      "deleted": "Supprimé",
+      "quantity_changed": "Qté modifiée"
+    }
   },
   "scan": {
     "title": "Scanner un QR",
