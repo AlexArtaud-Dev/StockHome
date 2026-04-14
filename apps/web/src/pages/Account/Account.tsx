@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { FileDown, Trash2, Users } from 'lucide-react';
 import { Layout } from '../../components/Layout/Layout';
+import { ConfirmDeleteModal } from '../../components/ConfirmDeleteModal/ConfirmDeleteModal';
 import { useAuth } from '../../context/AuthContext';
 import { useHousehold } from '../../context/HouseholdContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,6 +16,7 @@ export function AccountPage() {
   const { user, logout, refreshUser } = useAuth();
   const { households, refreshHouseholds } = useHousehold();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
 
   // Profile section
   const [firstName, setFirstName] = useState(user?.firstName ?? '');
@@ -34,11 +38,16 @@ export function AccountPage() {
   const [newHouseholdName, setNewHouseholdName] = useState('');
   const [newHouseholdType, setNewHouseholdType] = useState<Household['type']>('other');
 
-  // Invite form state per household
-  const [inviteOpenId, setInviteOpenId] = useState<string | null>(null);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteStatus, setInviteStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  const [inviteError, setInviteError] = useState<string | null>(null);
+  // Delete household
+  const [deleteTarget, setDeleteTarget] = useState<Household | null>(null);
+
+  // Notifications section
+  const [notifyExpiryEnabled, setNotifyExpiryEnabled] = useState(user?.notifyExpiryEnabled ?? false);
+  const [notifyExpiryDays, setNotifyExpiryDays] = useState(String(user?.notifyExpiryDays ?? 7));
+  const [notifyWeeklySummary, setNotifyWeeklySummary] = useState(user?.notifyWeeklySummary ?? false);
+  const [weeklyDigestDayOfWeek, setWeeklyDigestDayOfWeek] = useState(String(user?.weeklyDigestDayOfWeek ?? 1));
+  const [notifSaving, setNotifSaving] = useState(false);
+  const [notifMsg, setNotifMsg] = useState<string | null>(null);
 
   useEffect(() => {
     api.get<HouseholdInvitation[]>('/invitations/pending')
@@ -97,24 +106,29 @@ export function AccountPage() {
     }
   }
 
-  function openInvite(householdId: string) {
-    setInviteOpenId(householdId);
-    setInviteEmail('');
-    setInviteStatus('idle');
-    setInviteError(null);
+  async function handleDeleteHousehold(householdId: string) {
+    await api.delete(`/households/${householdId}`);
+    await refreshHouseholds();
+    setDeleteTarget(null);
   }
 
-  async function handleSendInvite(e: React.FormEvent, householdId: string) {
+  async function handleSaveNotifications(e: React.FormEvent) {
     e.preventDefault();
-    setInviteStatus('sending');
-    setInviteError(null);
+    setNotifSaving(true);
+    setNotifMsg(null);
     try {
-      await api.post(`/households/${householdId}/invite`, { email: inviteEmail });
-      setInviteStatus('sent');
-      setInviteEmail('');
-    } catch (err) {
-      setInviteStatus('error');
-      setInviteError(err instanceof ApiError ? err.message : t('common.error'));
+      await api.patch('/users/me/notifications', {
+        notifyExpiryEnabled,
+        notifyExpiryDays: parseInt(notifyExpiryDays, 10) || 7,
+        notifyWeeklySummary,
+        weeklyDigestDayOfWeek: parseInt(weeklyDigestDayOfWeek, 10),
+      });
+      await refreshUser();
+      setNotifMsg(t('account.notifSaved'));
+    } catch {
+      setNotifMsg(t('common.error'));
+    } finally {
+      setNotifSaving(false);
     }
   }
 
@@ -269,46 +283,42 @@ export function AccountPage() {
                   </span>
                 </div>
                 <div className={styles.householdActions}>
-                  {h.isOwner && (
-                    <button
-                      className={styles.inviteBtn}
-                      onClick={() => inviteOpenId === h.id ? setInviteOpenId(null) : openInvite(h.id)}
-                    >
-                      {t('household.inviteMember')}
-                    </button>
-                  )}
+                  <button
+                    className={styles.iconBtn}
+                    title={t('account.exportPdf')}
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = `/api/v1/export/household/pdf`;
+                      link.download = `${h.name}.pdf`;
+                      link.click();
+                    }}
+                  >
+                    <FileDown size={15} />
+                  </button>
+                  <button
+                    className={styles.iconBtn}
+                    title={t('account.manageMembers')}
+                    onClick={() => navigate('/members')}
+                  >
+                    <Users size={15} />
+                  </button>
                   {!h.isOwner && (
                     <button className={styles.leaveBtn} onClick={() => handleLeave(h.id)}>
                       {t('account.leaveHousehold')}
                     </button>
                   )}
+                  {h.isOwner && (
+                    <button
+                      className={styles.deleteHouseholdBtn}
+                      onClick={() => setDeleteTarget(h)}
+                      title={t('account.deleteHousehold')}
+                      aria-label={t('account.deleteHousehold')}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {/* Inline invite form */}
-              {inviteOpenId === h.id && (
-                <form className={styles.inviteForm} onSubmit={(e) => handleSendInvite(e, h.id)}>
-                  <input
-                    type="email"
-                    className={styles.inviteInput}
-                    placeholder={t('household.inviteEmailPlaceholder')}
-                    value={inviteEmail}
-                    onChange={(e) => { setInviteEmail(e.target.value); setInviteStatus('idle'); }}
-                    autoFocus
-                    required
-                  />
-                  <div className={styles.formRow}>
-                    <button type="submit" className={styles.saveBtn} disabled={inviteStatus === 'sending'}>
-                      {inviteStatus === 'sending' ? t('household.sending') : t('household.sendInvite')}
-                    </button>
-                    <button type="button" className={styles.cancelBtn} onClick={() => setInviteOpenId(null)}>
-                      {t('common.cancel')}
-                    </button>
-                  </div>
-                  {inviteStatus === 'sent' && <p className={styles.successMsg}>{t('household.inviteSent')}</p>}
-                  {inviteStatus === 'error' && <p className={styles.errorMsg}>{inviteError}</p>}
-                </form>
-              )}
             </div>
           ))}
         </div>
@@ -402,12 +412,93 @@ export function AccountPage() {
         </div>
       </section>
 
+      {/* Notifications */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>{t('account.notificationsSection')}</h2>
+        <form onSubmit={handleSaveNotifications} className={styles.form}>
+          <div className={styles.prefRow}>
+            <span className={styles.prefLabel}>{t('account.notifyExpiry')}</span>
+            <button
+              type="button"
+              className={`${styles.toggleBtn} ${notifyExpiryEnabled ? styles.active : ''}`}
+              onClick={() => setNotifyExpiryEnabled((v) => !v)}
+            >
+              {notifyExpiryEnabled ? 'On' : 'Off'}
+            </button>
+          </div>
+          {notifyExpiryEnabled && (
+            <div className={styles.fieldRow}>
+              <div className={styles.field}>
+                <label htmlFor="expiryDays">{t('account.notifyExpiryDays')}</label>
+                <input
+                  id="expiryDays"
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={notifyExpiryDays}
+                  onChange={(e) => setNotifyExpiryDays(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          <div className={styles.prefRow}>
+            <span className={styles.prefLabel}>{t('account.notifyWeeklySummary')}</span>
+            <button
+              type="button"
+              className={`${styles.toggleBtn} ${notifyWeeklySummary ? styles.active : ''}`}
+              onClick={() => setNotifyWeeklySummary((v) => !v)}
+            >
+              {notifyWeeklySummary ? 'On' : 'Off'}
+            </button>
+          </div>
+          {notifyWeeklySummary && (
+            <div className={styles.field}>
+              <label htmlFor="digestDay">{t('account.weeklyDigestDay')}</label>
+              <select
+                id="digestDay"
+                value={weeklyDigestDayOfWeek}
+                onChange={(e) => setWeeklyDigestDayOfWeek(e.target.value)}
+              >
+                {[
+                  { v: '0', label: 'Sunday' },
+                  { v: '1', label: 'Monday' },
+                  { v: '2', label: 'Tuesday' },
+                  { v: '3', label: 'Wednesday' },
+                  { v: '4', label: 'Thursday' },
+                  { v: '5', label: 'Friday' },
+                  { v: '6', label: 'Saturday' },
+                ].map(({ v, label }) => (
+                  <option key={v} value={v}>{label}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          {notifMsg && <p className={styles.successMsg}>{notifMsg}</p>}
+          <button type="submit" className={styles.saveBtn} disabled={notifSaving}>
+            {notifSaving ? t('common.saving') : t('account.saveNotifications')}
+          </button>
+        </form>
+      </section>
+
       {/* Sign out */}
       <section className={styles.section}>
         <button className={styles.logoutBtn} onClick={logout}>
           Sign out
         </button>
       </section>
+
+      {/* Delete household confirmation modal */}
+      {deleteTarget && (
+        <ConfirmDeleteModal
+          title={t('account.confirmDelete1', { name: deleteTarget.name })}
+          step1Body={t('account.confirmDelete1Body')}
+          step2Body={t('account.confirmDelete2Body')}
+          confirmName={deleteTarget.name}
+          confirmPlaceholder={t('account.confirmDeletePlaceholder')}
+          onConfirm={() => handleDeleteHousehold(deleteTarget.id)}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </Layout>
   );
 }

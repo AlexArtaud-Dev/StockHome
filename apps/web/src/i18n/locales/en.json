@@ -23,7 +23,10 @@
     "search": "Search",
     "scanQr": "Scan QR",
     "shop": "Shop",
-    "account": "Account"
+    "account": "Account",
+    "members": "Members",
+    "expiring": "Expiring",
+    "history": "History"
   },
   "home": {
     "noRooms": "No rooms yet.",
@@ -110,7 +113,9 @@
     "minStockPlaceholder": "e.g. 2",
     "minStockHint": "Item appears in Shop when quantity drops below this value.",
     "addBtn": "Add item",
-    "confirmDelete": "Delete \"{{name}}\"?"
+    "confirmDelete": "Delete \"{{name}}\"?",
+    "expiresAt": "Expiry date",
+    "expiresAtHint": "Set an expiry date to receive alerts when this item is about to expire."
   },
   "search": {
     "title": "Search",
@@ -186,7 +191,22 @@
     "decline": "Decline",
     "inviteFrom": "{{householdName}} · invited by {{inviterName}}",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "deleteHousehold": "Delete household",
+    "confirmDelete1": "Delete \"{{name}}\"?",
+    "confirmDelete1Body": "This will permanently delete the household and all its contents (rooms, containers, items). This action cannot be undone.",
+    "confirmDelete2": "Are you absolutely sure?",
+    "confirmDelete2Body": "Type the household name to confirm deletion.",
+    "confirmDeletePlaceholder": "Type household name…",
+    "manageMembers": "Manage members",
+    "exportPdf": "Export as PDF",
+    "notificationsSection": "Notifications",
+    "notifyExpiry": "Expiry alerts",
+    "notifyExpiryDays": "days before expiry",
+    "notifyWeeklySummary": "Weekly summary",
+    "weeklyDigestDay": "Digest day",
+    "saveNotifications": "Save preferences",
+    "notifSaved": "Preferences saved"
   },
   "household": {
     "createTitle": "New household",
@@ -266,10 +286,47 @@
     "belowMinimum": "Below minimum",
     "renewalDue": "Renewal due",
     "currentQty": "qty: {{qty}}",
-    "minQty": "min: {{min}}"
+    "minQty": "min: {{min}}",
+    "addQty": "Qty to add",
+    "confirm": "Add"
+  },
+  "expiring": {
+    "title": "Expiring Soon",
+    "empty": "No items expiring soon!",
+    "emptyDesc": "Items with an expiry date will appear here.",
+    "expired": "Expired",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "filter7": "7 days",
+    "filter14": "14 days",
+    "filter30": "30 days",
+    "filter90": "90 days"
+  },
+  "history": {
+    "title": "Movement History",
+    "empty": "No activity yet.",
+    "emptyDesc": "Item movements will be recorded here.",
+    "csv": "Export CSV",
+    "json": "Export JSON",
+    "actions": {
+      "created": "Created",
+      "moved": "Moved",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "quantity_changed": "Qty changed"
+    }
   },
   "scan": {
     "title": "Scan QR Code",
     "notFound": "Container not found in your household."
+  },
+  "members": {
+    "title": "Members",
+    "currentMembers": "Current members",
+    "inviteSection": "Invite someone",
+    "owner": "Owner",
+    "you": "You",
+    "joinedAt": "Joined {{date}}",
+    "removeMember": "Remove member"
   }
 }

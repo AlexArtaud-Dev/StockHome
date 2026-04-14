@@ -50,6 +50,9 @@ export class ItemEntity {
   @Column({ type: 'boolean', default: false })
   isConsumable!: boolean;
 
+  @Column({ type: 'datetime', nullable: true })
+  expiresAt!: Date | null;
+
   @CreateDateColumn()
   createdAt!: Date;
 

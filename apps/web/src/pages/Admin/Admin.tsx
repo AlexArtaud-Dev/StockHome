@@ -37,8 +37,8 @@ export function AdminPage() {
         `/admin/users/${userId}/${action}`,
         {},
       );
-      if (result?.temporaryPassword) {
-        setActionResult(`Temporary password: ${result.temporaryPassword}`);
+      if (result?.message) {
+        setActionResult(result.message);
       }
       await loadUsers(search);
     } catch (err) {

@@ -5,6 +5,11 @@ on:
     branches: [main]
   workflow_dispatch: # allow manual trigger from GitHub UI
 
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE: ghcr.io/${{ github.repository_owner }}/stockhome-api
+  WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/stockhome-web
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest

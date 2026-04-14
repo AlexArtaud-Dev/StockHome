@@ -4,7 +4,7 @@ import { Request } from 'express';
 export interface JwtPayload {
   sub: string;
   username: string;
-  householdId: string;
+  householdId: string | null;
   isAdmin: boolean;
 }
 

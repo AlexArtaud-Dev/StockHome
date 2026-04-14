@@ -96,6 +96,9 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
   const [tags, setTags] = useState<TagOption[]>(
     item?.tags?.map((tag) => ({ label: tag.name, value: tag.name })) ?? [],
   );
+  const [expiresAt, setExpiresAt] = useState(
+    item?.expiresAt ? item.expiresAt.substring(0, 10) : '',
+  );
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -120,6 +123,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
           isConsumable,
           tagNames,
           containerId,
+          expiresAt: expiresAt || null,
         });
         savedId = item.id;
       } else {
@@ -131,6 +135,7 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
           tagNames,
           containerId,
           roomId,
+          expiresAt: expiresAt || null,
         });
         savedId = created.id;
       }
@@ -265,6 +270,20 @@ export function ItemForm({ containerId, roomId, item, onClose, onSaved }: Props)
             </div>
           </div>
         )}
+
+        <div className={formStyles.field}>
+          <label htmlFor="expiresAt">
+            {t('itemForm.expiresAt')}{' '}
+            <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>{t('common.optional')}</span>
+          </label>
+          <input
+            id="expiresAt"
+            type="date"
+            value={expiresAt}
+            onChange={(e) => setExpiresAt(e.target.value)}
+          />
+          <span className={formStyles.hint}>{t('itemForm.expiresAtHint')}</span>
+        </div>
 
         <div className={formStyles.actions}>
           {isEdit && (

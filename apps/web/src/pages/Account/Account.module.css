@@ -25,6 +25,11 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-3);
+  min-width: 0;
+}
+
+.fieldRow .field {
+  min-width: 0;
 }
 
 .field {
@@ -197,6 +202,24 @@
   font-weight: 600;
 }
 
+.iconBtn {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.iconBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 .leaveBtn {
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-danger);
@@ -209,6 +232,20 @@
   white-space: nowrap;
 }
 .leaveBtn:hover { background-color: var(--color-danger-bg); }
+
+.deleteHouseholdBtn {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  color: var(--color-danger);
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.deleteHouseholdBtn:hover { background-color: var(--color-danger-bg); }
 
 .newHouseholdBtn {
   padding: var(--space-2) var(--space-4);

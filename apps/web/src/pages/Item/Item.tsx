@@ -95,6 +95,10 @@ export function ItemPage() {
           </div>
         )}
 
+        {item.expiresAt && (
+          <ExpiryBadge expiresAt={item.expiresAt} />
+        )}
+
         <div className={styles.meta}>
           <span>Added {new Date(item.createdAt).toLocaleDateString()}</span>
           {item.updatedAt !== item.createdAt && (
@@ -116,6 +120,24 @@ export function ItemPage() {
         />
       )}
     </Layout>
+  );
+}
+
+function ExpiryBadge({ expiresAt }: { expiresAt: string }) {
+  const daysLeft = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const label = daysLeft <= 0
+    ? 'Expired'
+    : daysLeft === 1
+    ? 'Expires tomorrow'
+    : `Expires in ${daysLeft} days`;
+  const color = daysLeft <= 0 ? '#dc2626' : daysLeft <= 3 ? '#ea580c' : daysLeft <= 7 ? '#d97706' : '#16a34a';
+  return (
+    <div className={styles.expiryBadge} style={{ borderColor: color, color }}>
+      <span>{label}</span>
+      <span style={{ opacity: 0.7, fontSize: '11px' }}>
+        {new Date(expiresAt).toLocaleDateString()}
+      </span>
+    </div>
   );
 }
 
