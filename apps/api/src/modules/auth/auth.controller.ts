@@ -1,7 +1,33 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, RefreshTokenDto, RegisterDto, ResendVerificationDto, VerifyEmailDto } from './auth.dto';
+import { LoginDto, RegisterDto, ResendVerificationDto, VerifyEmailDto } from './auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
+import { AuthTokens } from '@stockhome/shared';
+
+const IS_PROD = process.env['NODE_ENV'] === 'production';
+
+function setTokenCookies(res: Response, tokens: AuthTokens) {
+  res.cookie('accessToken', tokens.accessToken, {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: 'strict',
+    maxAge: 15 * 60 * 1000, // 15 minutes
+    path: '/',
+  });
+  res.cookie('refreshToken', tokens.refreshToken, {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/api/v1/auth/refresh',
+  });
+}
+
+function clearTokenCookies(res: Response) {
+  res.clearCookie('accessToken', { path: '/' });
+  res.clearCookie('refreshToken', { path: '/api/v1/auth/refresh' });
+}
 
 @Controller('api/v1/auth')
 export class AuthController {
@@ -15,14 +41,35 @@ export class AuthController {
 
   @Public()
   @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { tokens, user } = await this.authService.login(dto);
+    setTokenCookies(res, tokens);
+    return { user };
   }
 
   @Public()
   @Post('refresh')
-  refresh(@Body() dto: RefreshTokenDto) {
-    return this.authService.refresh(dto.refreshToken);
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const refreshToken = req.cookies?.['refreshToken'] as string | undefined;
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token');
+    }
+    const tokens = await this.authService.refresh(refreshToken);
+    setTokenCookies(res, tokens);
+    return { success: true };
+  }
+
+  @Public()
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    clearTokenCookies(res);
+    return { success: true };
   }
 
   @Public()

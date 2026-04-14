@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CheckSquare, Edit2, FileText, LayoutGrid, LayoutList, Plus, Square, X } from 'lucide-react';
+import { CheckSquare, Edit2, FileDown, FileText, LayoutGrid, LayoutList, Plus, Square, X } from 'lucide-react';
 import { Tooltip } from '../../components/Tooltip/Tooltip';
 import { Layout } from '../../components/Layout/Layout';
 import { useApi } from '../../hooks/useApi';
@@ -83,6 +83,20 @@ export function RoomPage() {
           <Tooltip content={t('room.editRoom')}>
             <button className={styles.iconBtn} onClick={() => setShowEditRoom(true)} aria-label={t('room.editRoom')}>
               <Edit2 size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content={t('account.exportPdf')}>
+            <button
+              className={styles.iconBtn}
+              aria-label={t('account.exportPdf')}
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = `/api/v1/export/rooms/${id}/pdf`;
+                link.download = `${room?.name ?? 'room'}.pdf`;
+                link.click();
+              }}
+            >
+              <FileDown size={18} />
             </button>
           </Tooltip>
           <Tooltip content={t('room.addContainer')}>

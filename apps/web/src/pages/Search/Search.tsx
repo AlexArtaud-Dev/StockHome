@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, ChevronRight, Package, SearchIcon } from 'lucide-react';
 import { Layout } from '../../components/Layout/Layout';
@@ -65,7 +65,8 @@ function groupResults(results: SearchResult[]): RoomGroup[] {
 
 export function SearchPage() {
   const { t } = useTranslation();
-  const [query, setQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
   const debouncedQuery = useDebounce(query, 300);
   const navigate = useNavigate();
 

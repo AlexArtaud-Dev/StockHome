@@ -103,6 +103,18 @@
   font-size: var(--font-size-sm);
 }
 
+.expiryBadge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  background-color: var(--color-bg-elevated);
+}
+
 .meta {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);

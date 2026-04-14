@@ -55,6 +55,22 @@ export class ItemService {
     return this.toDto(item);
   }
 
+  async findExpiring(days: number, householdId: string): Promise<Item[]> {
+    const now = new Date();
+    const cutoff = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+    const items = await this.itemRepo
+      .createQueryBuilder('i')
+      .leftJoinAndSelect('i.categories', 'cat')
+      .leftJoinAndSelect('i.tags', 'tag')
+      .leftJoinAndSelect('i.stockRule', 'stockRule')
+      .where('i.householdId = :householdId', { householdId })
+      .andWhere('i.expiresAt IS NOT NULL')
+      .andWhere('i.expiresAt <= :cutoff', { cutoff: cutoff.toISOString() })
+      .orderBy('i.expiresAt', 'ASC')
+      .getMany();
+    return items.map(this.toDto);
+  }
+
   async create(dto: CreateItemDto, householdId: string, userId: string): Promise<Item> {
     const room = await this.roomRepo.findOneBy({ id: dto.roomId, householdId });
     if (!room) throw new NotFoundException('Room not found');
@@ -75,6 +91,7 @@ export class ItemService {
       quantity: dto.quantity ?? 1,
       icon: dto.icon ?? null,
       isConsumable: dto.isConsumable ?? false,
+      expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
       categories,
       tags,
     });
@@ -106,6 +123,7 @@ export class ItemService {
     if (dto.quantity !== undefined) item.quantity = dto.quantity;
     if (dto.icon !== undefined) item.icon = dto.icon ?? null;
     if (dto.isConsumable !== undefined) item.isConsumable = dto.isConsumable;
+    if (dto.expiresAt !== undefined) item.expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : null;
 
     if (dto.categoryIds) {
       item.categories = await this.categoryRepo.findBy({ id: In(dto.categoryIds) });
@@ -227,6 +245,7 @@ export class ItemService {
       photoPath: item.photoPath,
       qrCode: item.qrCode,
       isConsumable: item.isConsumable,
+      expiresAt: item.expiresAt?.toISOString() ?? null,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
       categories: item.categories?.map((c) => ({

@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { ContainerEntity } from '../../database/entities/container.entity';
 import { RoomEntity } from '../../database/entities/room.entity';
+import { ItemEntity } from '../../database/entities/item.entity';
 import { CreateContainerDto, UpdateContainerDto } from './container.dto';
 import { Container } from '@stockhome/shared';
 
@@ -18,6 +19,8 @@ export class ContainerService {
     private readonly containerRepo: Repository<ContainerEntity>,
     @InjectRepository(RoomEntity)
     private readonly roomRepo: Repository<RoomEntity>,
+    @InjectRepository(ItemEntity)
+    private readonly itemRepo: Repository<ItemEntity>,
   ) {}
 
   async findAll(householdId: string, roomId?: string, parentContainerId?: string): Promise<Container[]> {
@@ -148,19 +151,53 @@ export class ContainerService {
       .andWhere('r.householdId = :householdId', { householdId })
       .getOne();
     if (!container) throw new NotFoundException('Container not found');
+
+    const copy = await this.deepCopyContainer(container, container.parentContainerId, `${container.name} (copy)`);
+    return this.toDto(copy);
+  }
+
+  private async deepCopyContainer(
+    source: ContainerEntity,
+    newParentId: string | null,
+    newName?: string,
+  ): Promise<ContainerEntity> {
     const copy = this.containerRepo.create({
       id: uuidv4(),
-      roomId: container.roomId,
-      parentContainerId: container.parentContainerId,
-      name: `${container.name} (copy)`,
-      description: container.description,
-      type: container.type,
-      icon: container.icon,
+      roomId: source.roomId,
+      parentContainerId: newParentId,
+      name: newName ?? source.name,
+      description: source.description,
+      type: source.type,
+      icon: source.icon,
       qrCode: uuidv4(),
-      sortOrder: container.sortOrder,
+      sortOrder: source.sortOrder,
     });
     await this.containerRepo.save(copy);
-    return this.toDto(copy);
+
+    // Copy items
+    const items = await this.itemRepo.findBy({ containerId: source.id });
+    for (const item of items) {
+      const itemCopy = this.itemRepo.create({
+        id: uuidv4(),
+        householdId: item.householdId,
+        roomId: item.roomId,
+        containerId: copy.id,
+        name: item.name,
+        description: item.description,
+        quantity: item.quantity,
+        icon: item.icon,
+        isConsumable: item.isConsumable,
+      });
+      await this.itemRepo.save(itemCopy);
+    }
+
+    // Recursively copy child containers
+    const children = await this.containerRepo.findBy({ parentContainerId: source.id });
+    for (const child of children) {
+      await this.deepCopyContainer(child, copy.id);
+    }
+
+    return copy;
   }
 
   async remove(id: string, householdId: string): Promise<void> {

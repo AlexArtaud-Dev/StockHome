@@ -53,3 +53,61 @@
 
 .name { font-weight: 600; }
 .reason { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+
+/* Inline restock controls */
+.restockInline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.qtyInput {
+  width: 60px;
+  padding: var(--space-1) var(--space-2);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  min-height: 36px;
+  outline: none;
+}
+
+.confirmBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-success, #16a34a);
+  background: none;
+  color: var(--color-success, #16a34a);
+  font-size: var(--font-size-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+.confirmBtn:hover {
+  background-color: rgba(22,163,74,0.12);
+}
+
+.cancelBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.cancelBtn:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}

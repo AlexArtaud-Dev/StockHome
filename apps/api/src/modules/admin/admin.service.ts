@@ -66,7 +66,7 @@ export class AdminService {
     return this.toAdminDto(user);
   }
 
-  async resetPassword(userId: string): Promise<{ temporaryPassword: string }> {
+  async resetPassword(userId: string): Promise<{ message: string }> {
     const user = await this.userRepo.findOneBy({ id: userId });
     if (!user) throw new NotFoundException('User not found');
 
@@ -79,7 +79,11 @@ export class AdminService {
     user.passwordHash = await bcrypt.hash(password, 12);
     await this.userRepo.save(user);
 
-    return { temporaryPassword: password };
+    if (user.email) {
+      await this.emailService.sendAdminPasswordEmail(user.email, password, true);
+    }
+
+    return { message: `Password reset. A new temporary password has been sent to ${user.email ?? 'the user'}.` };
   }
 
   async resendConfirmation(userId: string) {

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { HouseholdGuard } from '../../common/guards/household.guard';
 import { CurrentUser, JwtPayload } from '../../common/decorators/current-user.decorator';
 import { QrService } from './qr.service';
 import { IsArray, IsUUID } from 'class-validator';
@@ -20,7 +21,7 @@ class ExportPdfDto {
 }
 
 @Controller('api/v1/qr')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HouseholdGuard)
 export class QrController {
   constructor(private readonly qrService: QrService) {}
 
@@ -36,7 +37,7 @@ export class QrController {
     @CurrentUser() user: JwtPayload,
     @Res() res: Response,
   ) {
-    const pdf = await this.qrService.exportPdf(dto.containerIds, user.householdId);
+    const pdf = await this.qrService.exportPdf(dto.containerIds, user.householdId!);
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename="qr-labels.pdf"',
