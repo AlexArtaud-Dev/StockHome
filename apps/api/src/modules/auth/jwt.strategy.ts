@@ -17,7 +17,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly userRepo: Repository<UserEntity>,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => (req?.cookies?.['accessToken'] as string | undefined) ?? null,
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
       ignoreExpiration: false,
       secretOrKey: process.env['JWT_SECRET'] ?? 'dev_secret',
       passReqToCallback: true,
@@ -47,7 +50,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (user?.householdId === requestedHouseholdId) {
           resolvedHouseholdId = requestedHouseholdId;
         } else {
-          throw new UnauthorizedException('Not a member of the requested household');
+          // Not a member — treat as no household context rather than throwing 401
+          resolvedHouseholdId = null;
         }
       }
     } else {
@@ -69,7 +73,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       sub: payload.sub,
       username: payload.username,
       isAdmin: payload.isAdmin ?? false,
-      householdId: resolvedHouseholdId ?? '',
+      householdId: resolvedHouseholdId,
     };
   }
 }

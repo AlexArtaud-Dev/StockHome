@@ -50,7 +50,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   login: (dto: LoginDto) => Promise<void>;
   register: (dto: RegisterDto) => Promise<{ message: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -64,28 +64,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      dispatch({ type: 'SET_LOADING', value: false });
-      return;
-    }
+    // The access token cookie is sent automatically — just try to fetch the user
     api
       .get<User>('/users/me')
       .then((user) => dispatch({ type: 'SET_USER', user }))
-      .catch(() => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        dispatch({ type: 'CLEAR_USER' });
-      });
+      .catch(() => dispatch({ type: 'CLEAR_USER' }));
   }, []);
 
   const login = useCallback(async (dto: LoginDto) => {
-    const response = await api.post<{ tokens: { accessToken: string; refreshToken: string }; user: User }>(
-      '/auth/login',
-      dto,
-    );
-    localStorage.setItem('accessToken', response.tokens.accessToken);
-    localStorage.setItem('refreshToken', response.tokens.refreshToken);
+    const response = await api.post<{ user: User }>('/auth/login', dto);
     dispatch({ type: 'SET_USER', user: response.user });
   }, []);
 
@@ -93,9 +80,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return api.post<{ message: string }>('/auth/register', dto);
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // ignore — clear state regardless
+    }
     localStorage.removeItem('selectedHouseholdId');
     dispatch({ type: 'CLEAR_USER' });
   }, []);

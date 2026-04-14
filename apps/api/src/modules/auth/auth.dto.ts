@@ -28,12 +28,6 @@ export class RegisterDto {
   password!: string;
 }
 
-export class RefreshTokenDto {
-  @IsString()
-  @IsNotEmpty()
-  refreshToken!: string;
-}
-
 export class VerifyEmailDto {
   @IsString()
   @IsNotEmpty()

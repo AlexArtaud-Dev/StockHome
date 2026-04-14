@@ -40,6 +40,10 @@ export interface User {
   displayName: string | null;
   isAdmin: boolean;
   isEmailVerified: boolean;
+  notifyExpiryEnabled: boolean;
+  notifyExpiryDays: number;
+  notifyWeeklySummary: boolean;
+  weeklyDigestDayOfWeek: number; // 0=Sunday, 1=Monday … 6=Saturday
   createdAt: string;
 }
 
@@ -114,6 +118,7 @@ export interface Item {
   photoPath: string | null;
   qrCode: string | null;
   isConsumable: boolean;
+  expiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
   categories?: Category[];
@@ -150,6 +155,17 @@ export interface MovementLog {
   id: string;
   itemId: string;
   userId: string;
+  action: MovementAction;
+  details: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface MovementLogEnriched {
+  id: string;
+  itemId: string;
+  itemName: string;
+  userId: string;
+  userName: string;
   action: MovementAction;
   details: Record<string, unknown>;
   createdAt: string;
@@ -240,6 +256,7 @@ export interface CreateItemDto {
   quantity?: number;
   icon?: string;
   isConsumable?: boolean;
+  expiresAt?: string | null;
   categoryIds?: string[];
   tagNames?: string[];
 }
@@ -251,6 +268,7 @@ export interface UpdateItemDto {
   quantity?: number;
   icon?: string;
   isConsumable?: boolean;
+  expiresAt?: string | null;
   categoryIds?: string[];
   tagNames?: string[];
 }
