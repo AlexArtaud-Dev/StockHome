@@ -144,6 +144,59 @@
 /* Search nav item — hidden on mobile, shown in desktop sidebar */
 .desktopOnly { display: none; }
 
+/* Mobile-only elements (hidden on desktop sidebar) */
+.mobileOnly { display: flex; }
+
+/* More bottom sheet (mobile only) */
+.moreOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.moreSheet {
+  position: fixed;
+  bottom: var(--nav-height);
+  left: 0;
+  right: 0;
+  z-index: 300;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.moreSheetHandle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--color-border);
+  margin: 0 auto var(--space-3);
+  flex-shrink: 0;
+}
+
+.moreSheetItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  text-decoration: none;
+  min-height: var(--touch-min);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.moreSheetItem:hover { background-color: rgba(99, 102, 241, 0.08); color: var(--color-primary); }
+.moreSheetItemActive { background-color: rgba(99, 102, 241, 0.1); color: var(--color-primary); font-weight: 600; }
+
 /* Mobile search icon in header */
 .mobileSearchBtn {
   display: flex;
@@ -251,8 +304,11 @@
 /* ── Desktop ≥ 1024px: sidebar layout ─────────────────────────────── */
 @media (min-width: 1024px) {
   .desktopOnly { display: flex; }
+  .mobileOnly { display: none; }
   .mobileSearchBtn { display: none; }
   .mobileSearchBar { display: none; }
+  .moreOverlay { display: none; }
+  .moreSheet { display: none; }
   .shell {
     flex-direction: row;
     height: 100dvh;

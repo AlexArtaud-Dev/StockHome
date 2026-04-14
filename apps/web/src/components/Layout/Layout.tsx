@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
@@ -7,6 +7,7 @@ import {
   Clock,
   History,
   Home,
+  MoreHorizontal,
   Package,
   QrCode,
   Search,
@@ -26,102 +27,182 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+const MORE_PATHS = ['/members', '/expiring', '/history', '/admin'];
+
 export function Layout({ title, showBack, actions, children }: LayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { user } = useAuth();
   const { households, selectedHousehold, setSelectedHousehold, hasHousehold } = useHousehold();
   const [showHouseholdDropdown, setShowHouseholdDropdown] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showMore, setShowMore] = useState(false);
+
+  // Close More sheet when navigating
+  useEffect(() => {
+    setShowMore(false);
+  }, [location.pathname]);
+
+  const moreIsActive = MORE_PATHS.some((p) => location.pathname.startsWith(p));
 
   return (
     <div className={styles.shell}>
-      {hasHousehold && <nav className={styles.nav} aria-label="Main navigation">
-        <div className={styles.navBrand}>
-          <Package size={22} />
-          StockHome
-        </div>
+      {hasHousehold && (
+        <nav className={styles.nav} aria-label="Main navigation">
+          {/* Brand — desktop sidebar only */}
+          <div className={styles.navBrand}>
+            <Package size={22} />
+            StockHome
+          </div>
 
-        {/* Household selector — desktop sidebar */}
-        {households.length > 0 && (
-          <div className={styles.householdSelector}>
-            <button
-              className={styles.householdBtn}
-              onClick={() => setShowHouseholdDropdown((v) => !v)}
+          {/* Household selector — desktop sidebar only */}
+          {households.length > 0 && (
+            <div className={styles.householdSelector}>
+              <button
+                className={styles.householdBtn}
+                onClick={() => setShowHouseholdDropdown((v) => !v)}
+              >
+                <span className={styles.householdName}>{selectedHousehold?.name ?? '—'}</span>
+                <ChevronDown size={14} />
+              </button>
+              {showHouseholdDropdown && (
+                <div className={styles.householdDropdown}>
+                  {households.map((h) => (
+                    <button
+                      key={h.id}
+                      className={`${styles.householdOption} ${h.id === selectedHousehold?.id ? styles.householdOptionActive : ''}`}
+                      onClick={() => { setSelectedHousehold(h.id); setShowHouseholdDropdown(false); }}
+                    >
+                      <span>{h.name}</span>
+                      <span className={styles.householdBadge}>
+                        {h.isOwner ? t('household.ownedLabel') : t('household.memberLabel')}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Items visible on both mobile and desktop ── */}
+
+          <NavLink to="/" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`} end>
+            <Home size={20} />
+            <span>{t('nav.home')}</span>
+          </NavLink>
+
+          {/* Search — desktop sidebar only */}
+          <NavLink to="/search" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
+            <Search size={20} />
+            <span>{t('nav.search')}</span>
+          </NavLink>
+
+          <NavLink to="/shopping-list" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
+            <ShoppingCart size={20} />
+            <span>{t('nav.shop')}</span>
+          </NavLink>
+
+          {/* Expiring — desktop sidebar only (mobile: More sheet) */}
+          <NavLink to="/expiring" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
+            <Clock size={20} />
+            <span>{t('nav.expiring')}</span>
+          </NavLink>
+
+          {/* History — desktop sidebar only (mobile: More sheet) */}
+          <NavLink to="/history" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
+            <History size={20} />
+            <span>{t('nav.history')}</span>
+          </NavLink>
+
+          {/* QR Scan — always center on mobile (position 3 of 5) */}
+          <NavLink to="/scan" className={styles.scanBtn} aria-label={t('nav.scanQr')}>
+            <QrCode size={20} />
+            <span className={styles.scanBtnLabel}>{t('nav.scanQr')}</span>
+          </NavLink>
+
+          {/* Members — desktop sidebar only (mobile: More sheet) */}
+          <NavLink to="/members" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
+            <Users size={20} />
+            <span>{t('nav.members')}</span>
+          </NavLink>
+
+          <div className={`${styles.navSpacer} ${styles.desktopOnly}`} />
+
+          {/* Admin — desktop sidebar only (mobile: More sheet) */}
+          {user?.isAdmin && (
+            <NavLink to="/admin" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
+              <ShieldCheck size={20} />
+              <span>Admin</span>
+            </NavLink>
+          )}
+
+          {/* Account — visible on both */}
+          <NavLink to="/account" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
+            <User size={20} />
+            <span>{t('nav.account')}</span>
+          </NavLink>
+
+          {/* More — mobile only (position 5 of 5) */}
+          <button
+            className={`${styles.navItem} ${styles.mobileOnly} ${moreIsActive ? styles.active : ''}`}
+            onClick={() => setShowMore((v) => !v)}
+            aria-label="More"
+            aria-expanded={showMore}
+          >
+            <MoreHorizontal size={20} />
+            <span>Plus</span>
+          </button>
+        </nav>
+      )}
+
+      {/* ── More bottom sheet (mobile only) ─────────────────────────── */}
+      {showMore && (
+        <>
+          <div className={styles.moreOverlay} onClick={() => setShowMore(false)} />
+          <div className={styles.moreSheet}>
+            <div className={styles.moreSheetHandle} />
+
+            <NavLink
+              to="/members"
+              className={({ isActive }) => `${styles.moreSheetItem} ${isActive ? styles.moreSheetItemActive : ''}`}
+              onClick={() => setShowMore(false)}
             >
-              <span className={styles.householdName}>{selectedHousehold?.name ?? '—'}</span>
-              <ChevronDown size={14} />
-            </button>
-            {showHouseholdDropdown && (
-              <div className={styles.householdDropdown}>
-                {households.map((h) => (
-                  <button
-                    key={h.id}
-                    className={`${styles.householdOption} ${h.id === selectedHousehold?.id ? styles.householdOptionActive : ''}`}
-                    onClick={() => { setSelectedHousehold(h.id); setShowHouseholdDropdown(false); }}
-                  >
-                    <span>{h.name}</span>
-                    <span className={styles.householdBadge}>
-                      {h.isOwner ? t('household.ownedLabel') : t('household.memberLabel')}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <Users size={22} />
+              {t('nav.members')}
+            </NavLink>
+
+            <NavLink
+              to="/expiring"
+              className={({ isActive }) => `${styles.moreSheetItem} ${isActive ? styles.moreSheetItemActive : ''}`}
+              onClick={() => setShowMore(false)}
+            >
+              <Clock size={22} />
+              {t('nav.expiring')}
+            </NavLink>
+
+            <NavLink
+              to="/history"
+              className={({ isActive }) => `${styles.moreSheetItem} ${isActive ? styles.moreSheetItemActive : ''}`}
+              onClick={() => setShowMore(false)}
+            >
+              <History size={22} />
+              {t('nav.history')}
+            </NavLink>
+
+            {user?.isAdmin && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) => `${styles.moreSheetItem} ${isActive ? styles.moreSheetItemActive : ''}`}
+                onClick={() => setShowMore(false)}
+              >
+                <ShieldCheck size={22} />
+                Admin
+              </NavLink>
             )}
           </div>
-        )}
-
-        <NavLink to="/" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`} end>
-          <Home size={20} />
-          <span>{t('nav.home')}</span>
-        </NavLink>
-
-        {/* Search — desktop sidebar only; on mobile it lives in the header */}
-        <NavLink to="/search" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
-          <Search size={20} />
-          <span>{t('nav.search')}</span>
-        </NavLink>
-
-        <NavLink to="/shopping-list" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
-          <ShoppingCart size={20} />
-          <span>{t('nav.shop')}</span>
-        </NavLink>
-
-        <NavLink to="/expiring" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
-          <Clock size={20} />
-          <span>{t('nav.expiring')}</span>
-        </NavLink>
-
-        <NavLink to="/history" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
-          <History size={20} />
-          <span>{t('nav.history')}</span>
-        </NavLink>
-
-        {/* QR Scan — center button on mobile */}
-        <NavLink to="/scan" className={styles.scanBtn} aria-label={t('nav.scanQr')}>
-          <QrCode size={20} />
-          <span className={styles.scanBtnLabel}>{t('nav.scanQr')}</span>
-        </NavLink>
-
-        <NavLink to="/members" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
-          <Users size={20} />
-          <span>{t('nav.members')}</span>
-        </NavLink>
-
-        <div className={styles.navSpacer} />
-
-        {user?.isAdmin && (
-          <NavLink to="/admin" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
-            <ShieldCheck size={20} />
-            <span>Admin</span>
-          </NavLink>
-        )}
-
-        <NavLink to="/account" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
-          <User size={20} />
-          <span>{t('nav.account')}</span>
-        </NavLink>
-      </nav>}
+        </>
+      )}
 
       <div className={styles.mainArea}>
         {title !== undefined && (
@@ -134,24 +215,16 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
               )}
               <h1 className={styles.headerTitle}>{title}</h1>
               {actions && <div className={styles.headerActions}>{actions}</div>}
-              {/* Search icon — mobile only */}
               {hasHousehold && (
                 <button
                   className={styles.mobileSearchBtn}
                   aria-label={t('nav.search')}
-                  onClick={() => {
-                    if (showMobileSearch) {
-                      setShowMobileSearch(false);
-                    } else {
-                      setShowMobileSearch(true);
-                    }
-                  }}
+                  onClick={() => setShowMobileSearch((v) => !v)}
                 >
                   <Search size={20} />
                 </button>
               )}
             </header>
-            {/* Expandable mobile search bar */}
             {showMobileSearch && (
               <div className={styles.mobileSearchBar}>
                 <form

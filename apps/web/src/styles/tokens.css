@@ -137,6 +137,9 @@
   --color-primary: #818cf8;
   --color-primary-hover: #a5b4fc;
   --color-primary-light: #1e1b4b;
+  --color-warning: #d29922;
+  --color-warning-bg: #1c1500;
   --color-danger: #f85149;
   --color-danger-bg: #1c0a09;
+  --color-danger-border: #4a1717;
 }
