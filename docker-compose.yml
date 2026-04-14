@@ -3,17 +3,31 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-    ports:
-      - "3001:3001"
+    # API is only reachable internally via the stockhome_net network.
+    # Do NOT expose port 3001 to the host — the nginx proxy handles all traffic.
     volumes:
-      - ./data:/app/data
+      - stockhome_data:/app/data
     environment:
-      - JWT_SECRET=${JWT_SECRET:-change_me_in_production}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change_me_refresh_secret}
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - DB_PATH=/app/data/stockhome.db
       - UPLOAD_DIR=/app/data/uploads
       - PORT=3001
+      - MAX_CONTAINER_DEPTH=${MAX_CONTAINER_DEPTH:-3}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - FIRST_LAUNCH=${FIRST_LAUNCH:-false}
+      - APP_URL=${APP_URL:-http://localhost:3000}
+      # SMTP — leave blank to fall back to console mock (no real emails sent)
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-noreply@stockhome.app}
     restart: unless-stopped
+    networks:
+      - stockhome_net
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/v1/health"]
       interval: 30s
@@ -25,7 +39,18 @@ services:
       context: .
       dockerfile: Dockerfile.web
     ports:
-      - "3000:80"
+      - "${APP_PORT:-3000}:80"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - stockhome_net
+
+volumes:
+  stockhome_data:
+    driver: local
+
+networks:
+  stockhome_net:
+    driver: bridge

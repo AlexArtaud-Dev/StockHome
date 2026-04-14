@@ -1,5 +1,8 @@
-# Build stage
+# ── API — Build stage ─────────────────────────────────────────────────
 FROM node:20-alpine AS builder
+
+# better-sqlite3 requires native compilation tools
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
@@ -13,22 +16,23 @@ COPY tsconfig.base.json ./
 COPY packages/shared/ ./packages/shared/
 COPY apps/api/ ./apps/api/
 
-RUN npm run build --workspace=packages/shared
-RUN npm run build --workspace=apps/api
+RUN npm run build --workspace=packages/shared && \
+    npm run build --workspace=apps/api
 
-# Runtime stage
+# ── API — Runtime stage ───────────────────────────────────────────────
 FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
+# Copy compiled node_modules directly (includes better-sqlite3 native binary)
+# This avoids re-running npm install (and native recompilation) in the runtime image
+COPY --from=builder /app/node_modules      ./node_modules
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/apps/api/dist     ./apps/api/dist
+
 COPY package.json ./
 COPY packages/shared/package.json ./packages/shared/
-COPY apps/api/package.json ./apps/api/
-
-RUN npm install --workspaces --include-workspace-root --omit=dev
-
-COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY apps/api/package.json         ./apps/api/
 
 RUN mkdir -p /app/data/uploads
 
