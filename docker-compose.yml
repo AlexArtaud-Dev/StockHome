@@ -1,6 +1,6 @@
 services:
   api:
-    image: ghcr.io/alexartaud-dev/stockhome-api:latest
+    image: ghcr.io/alexartaud-dev/stockhome-api:latest  # must stay lowercase
     volumes:
       - stockhome_data:/app/data
     env_file:
@@ -32,7 +32,7 @@ services:
       retries: 3
 
   web:
-    image: ghcr.io/alexartaud-dev/stockhome-web:latest
+    image: ghcr.io/alexartaud-dev/stockhome-web:latest  # must stay lowercase
     ports:
       - "${APP_PORT:-3000}:80"
     depends_on:
