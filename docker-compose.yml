@@ -1,8 +1,6 @@
 services:
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
+    image: ghcr.io/alexartaud-dev/stockhome-api:latest
     volumes:
       - stockhome_data:/app/data
     env_file:
@@ -34,9 +32,7 @@ services:
       retries: 3
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile.web
+    image: ghcr.io/alexartaud-dev/stockhome-web:latest
     ports:
       - "${APP_PORT:-3000}:80"
     depends_on:
