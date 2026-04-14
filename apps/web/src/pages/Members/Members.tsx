@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UserMinus } from 'lucide-react';
+import { Send, UserMinus } from 'lucide-react';
 import { Layout } from '../../components/Layout/Layout';
 import { useAuth } from '../../context/AuthContext';
 import { useHousehold } from '../../context/HouseholdContext';
@@ -141,8 +141,10 @@ export function MembersPage() {
                     type="submit"
                     className={styles.inviteBtn}
                     disabled={inviteStatus === 'sending'}
+                    title={inviteStatus === 'sending' ? t('household.sending') : t('household.sendInvite')}
+                    aria-label={inviteStatus === 'sending' ? t('household.sending') : t('household.sendInvite')}
                   >
-                    {inviteStatus === 'sending' ? t('household.sending') : t('household.sendInvite')}
+                    <Send size={18} />
                   </button>
                 </div>
                 {inviteStatus === 'sent' && (

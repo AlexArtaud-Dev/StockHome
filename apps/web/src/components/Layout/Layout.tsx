@@ -80,22 +80,23 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
           <span>{t('nav.search')}</span>
         </NavLink>
 
-        <NavLink to="/scan" className={styles.scanBtn} aria-label={t('nav.scanQr')}>
-          <QrCode size={20} />
-          <span className={styles.scanBtnLabel}>{t('nav.scanQr')}</span>
-        </NavLink>
-
         <NavLink to="/shopping-list" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
           <ShoppingCart size={20} />
           <span>{t('nav.shop')}</span>
         </NavLink>
 
-        <div className={styles.navSpacer} />
+        {/* QR Scan — center button on mobile */}
+        <NavLink to="/scan" className={styles.scanBtn} aria-label={t('nav.scanQr')}>
+          <QrCode size={20} />
+          <span className={styles.scanBtnLabel}>{t('nav.scanQr')}</span>
+        </NavLink>
 
         <NavLink to="/members" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
           <Users size={20} />
           <span>{t('nav.members')}</span>
         </NavLink>
+
+        <div className={styles.navSpacer} />
 
         {user?.isAdmin && (
           <NavLink to="/admin" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>

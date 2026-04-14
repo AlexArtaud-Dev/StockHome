@@ -30,27 +30,23 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     ...getHouseholdHeaders(),
   };
 
-  const token = localStorage.getItem('accessToken');
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
   const response = await fetch(`${BASE_URL}${path}`, {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
     signal,
+    credentials: 'include',
   });
 
   if (response.status === 401 && path !== '/auth/login' && path !== '/auth/register') {
     const refreshed = await tryRefreshToken();
     if (refreshed) {
-      headers['Authorization'] = `Bearer ${localStorage.getItem('accessToken')}`;
       const retried = await fetch(`${BASE_URL}${path}`, {
         method,
         headers,
         body: body !== undefined ? JSON.stringify(body) : undefined,
         signal,
+        credentials: 'include',
       });
       if (!retried.ok) {
         const err = await retried.json().catch(() => ({ error: 'Request failed' }));
@@ -60,10 +56,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       const json = await retried.json() as { data: T };
       return json.data;
     } else {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
       localStorage.removeItem('selectedHouseholdId');
-      window.location.href = '/auth/login';
+      if (!window.location.pathname.startsWith('/auth/')) {
+        window.location.href = '/auth/login';
+      }
       throw new ApiError(401, 'Session expired');
     }
   }
@@ -80,22 +76,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 }
 
 async function tryRefreshToken(): Promise<boolean> {
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) return false;
-
   try {
     const response = await fetch(`${BASE_URL}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+      credentials: 'include',
     });
-
-    if (!response.ok) return false;
-
-    const json = await response.json() as { data: { accessToken: string; refreshToken: string } };
-    localStorage.setItem('accessToken', json.data.accessToken);
-    localStorage.setItem('refreshToken', json.data.refreshToken);
-    return true;
+    return response.ok;
   } catch {
     return false;
   }
@@ -105,13 +92,12 @@ async function requestForm<T>(path: string, formData: FormData): Promise<T> {
   const headers: Record<string, string> = {
     ...getHouseholdHeaders(),
   };
-  const token = localStorage.getItem('accessToken');
-  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const response = await fetch(`${BASE_URL}${path}`, {
     method: 'POST',
     headers,
     body: formData,
+    credentials: 'include',
   });
 
   if (!response.ok) {

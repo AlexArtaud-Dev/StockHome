@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { FileDown, Users } from 'lucide-react';
+import { FileDown, Trash2, Users } from 'lucide-react';
 import { Layout } from '../../components/Layout/Layout';
 import { ConfirmDeleteModal } from '../../components/ConfirmDeleteModal/ConfirmDeleteModal';
 import { useAuth } from '../../context/AuthContext';
@@ -280,8 +280,13 @@ export function AccountPage() {
                     </button>
                   )}
                   {h.isOwner && (
-                    <button className={styles.deleteHouseholdBtn} onClick={() => setDeleteTarget(h)}>
-                      {t('account.deleteHousehold')}
+                    <button
+                      className={styles.deleteHouseholdBtn}
+                      onClick={() => setDeleteTarget(h)}
+                      title={t('account.deleteHousehold')}
+                      aria-label={t('account.deleteHousehold')}
+                    >
+                      <Trash2 size={15} />
                     </button>
                   )}
                 </div>
