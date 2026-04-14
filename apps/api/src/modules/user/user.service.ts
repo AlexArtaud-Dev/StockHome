@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
 import { UserEntity } from '../../database/entities/user.entity';
 
 export class UpdateProfileDto {
@@ -28,6 +28,28 @@ export class ChangePasswordDto {
   @IsString()
   @MinLength(8)
   newPassword!: string;
+}
+
+export class UpdateNotificationsDto {
+  @IsBoolean()
+  @IsOptional()
+  notifyExpiryEnabled?: boolean;
+
+  @IsInt()
+  @Min(1)
+  @Max(365)
+  @IsOptional()
+  notifyExpiryDays?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  notifyWeeklySummary?: boolean;
+
+  @IsInt()
+  @Min(0)
+  @Max(6)
+  @IsOptional()
+  weeklyDigestDayOfWeek?: number;
 }
 
 @Injectable()
@@ -52,6 +74,19 @@ export class UserService {
     if (dto.firstName !== undefined || dto.lastName !== undefined) {
       user.displayName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.displayName;
     }
+    await this.userRepo.save(user);
+    return this.toDto(user);
+  }
+
+  async updateNotifications(id: string, dto: UpdateNotificationsDto) {
+    const user = await this.userRepo.findOneBy({ id });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (dto.notifyExpiryEnabled !== undefined) user.notifyExpiryEnabled = dto.notifyExpiryEnabled;
+    if (dto.notifyExpiryDays !== undefined) user.notifyExpiryDays = dto.notifyExpiryDays;
+    if (dto.notifyWeeklySummary !== undefined) user.notifyWeeklySummary = dto.notifyWeeklySummary;
+    if (dto.weeklyDigestDayOfWeek !== undefined) user.weeklyDigestDayOfWeek = dto.weeklyDigestDayOfWeek;
+
     await this.userRepo.save(user);
     return this.toDto(user);
   }
@@ -83,6 +118,10 @@ export class UserService {
       displayName: user.displayName,
       isAdmin: user.isAdmin,
       isEmailVerified: user.isEmailVerified,
+      notifyExpiryEnabled: user.notifyExpiryEnabled,
+      notifyExpiryDays: user.notifyExpiryDays,
+      notifyWeeklySummary: user.notifyWeeklySummary,
+      weeklyDigestDayOfWeek: user.weeklyDigestDayOfWeek,
       createdAt: user.createdAt.toISOString(),
     };
   }

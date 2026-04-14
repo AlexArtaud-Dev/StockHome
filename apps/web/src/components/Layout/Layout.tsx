@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   ChevronDown,
+  Clock,
+  History,
   Home,
   Package,
   QrCode,
@@ -83,6 +85,16 @@ export function Layout({ title, showBack, actions, children }: LayoutProps) {
         <NavLink to="/shopping-list" className={({ isActive }) => `${styles.navItem} ${isActive ? styles.active : ''}`}>
           <ShoppingCart size={20} />
           <span>{t('nav.shop')}</span>
+        </NavLink>
+
+        <NavLink to="/expiring" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
+          <Clock size={20} />
+          <span>{t('nav.expiring')}</span>
+        </NavLink>
+
+        <NavLink to="/history" className={({ isActive }) => `${styles.navItem} ${styles.desktopOnly} ${isActive ? styles.active : ''}`}>
+          <History size={20} />
+          <span>{t('nav.history')}</span>
         </NavLink>
 
         {/* QR Scan — center button on mobile */}

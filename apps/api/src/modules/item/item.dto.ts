@@ -2,6 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsInt,
+  IsISO8601,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -39,6 +40,10 @@ export class CreateItemDto {
   @IsOptional()
   isConsumable?: boolean;
 
+  @IsISO8601()
+  @IsOptional()
+  expiresAt?: string;
+
   @IsArray()
   @IsUUID(undefined, { each: true })
   @IsOptional()
@@ -75,6 +80,10 @@ export class UpdateItemDto {
   @IsBoolean()
   @IsOptional()
   isConsumable?: boolean;
+
+  @IsISO8601()
+  @IsOptional()
+  expiresAt?: string;
 
   @IsArray()
   @IsUUID(undefined, { each: true })

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { ItemEntity } from '../../database/entities/item.entity';
 
 @Injectable()
 export class EmailService {
@@ -175,6 +176,125 @@ export class EmailService {
       this.logger.log(`Admin password email sent to ${email}`);
     } catch (err) {
       this.logger.error(`Failed to send admin password email to ${email}: ${(err as Error).message}`);
+    }
+  }
+
+  async sendExpiryAlertEmail(email: string, items: ItemEntity[], days: number): Promise<void> {
+    const subject = `StockHome: ${items.length} item${items.length !== 1 ? 's' : ''} expiring within ${days} day${days !== 1 ? 's' : ''}`;
+    const itemRows = items
+      .map((item) => {
+        const expiresAt = item.expiresAt ? item.expiresAt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown';
+        return `<tr>
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:14px;color:#111827;">${item.name}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:14px;color:#374151;text-align:center;">${item.quantity}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;font-size:14px;color:#dc2626;text-align:center;">${expiresAt}</td>
+        </tr>`;
+      })
+      .join('');
+    const textRows = items
+      .map((item) => {
+        const expiresAt = item.expiresAt ? item.expiresAt.toISOString().split('T')[0] : 'Unknown';
+        return `  - ${item.name} (qty: ${item.quantity}) — expires ${expiresAt}`;
+      })
+      .join('\n');
+    const html = this.baseTemplate(subject, `
+      <div style="padding:32px 32px 8px;border-bottom:4px solid #f59e0b;">
+        <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Items expiring soon</h1>
+        <p style="margin:0;font-size:15px;color:#6b7280;">${items.length} item${items.length !== 1 ? 's' : ''} will expire within ${days} day${days !== 1 ? 's' : ''}.</p>
+      </div>
+      <div style="padding:24px 32px 32px;">
+        <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">
+          The following items in your household are expiring soon. Please check your inventory and take appropriate action.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:24px;">
+          <thead>
+            <tr style="background-color:#f3f4f6;">
+              <th style="padding:10px 12px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;text-align:left;">Item</th>
+              <th style="padding:10px 12px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;text-align:center;">Qty</th>
+              <th style="padding:10px 12px;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;text-align:center;">Expires</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemRows}
+          </tbody>
+        </table>
+        <table cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="border-radius:8px;background-color:#6366f1;">
+              <a href="${this.appUrl}" style="display:inline-block;padding:12px 24px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px;">
+                Open StockHome
+              </a>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `);
+    try {
+      await this.getTransporter().sendMail({
+        from: this.from,
+        to: email,
+        subject,
+        text: `The following items in your household are expiring within ${days} days:\n\n${textRows}\n\nOpen StockHome: ${this.appUrl}`,
+        html,
+      });
+      this.logger.log(`Expiry alert email sent to ${email} (${items.length} items)`);
+    } catch (err) {
+      this.logger.error(`Failed to send expiry alert email to ${email}: ${(err as Error).message}`);
+    }
+  }
+
+  async sendWeeklySummaryEmail(email: string, stats: { totalItems: number; lowStock: number; expiringSoon: number }): Promise<void> {
+    const subject = 'StockHome: Your weekly household summary';
+    const html = this.baseTemplate(subject, `
+      <div style="padding:32px 32px 8px;border-bottom:4px solid #6366f1;">
+        <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Weekly summary</h1>
+        <p style="margin:0;font-size:15px;color:#6b7280;">Here's a snapshot of your household inventory.</p>
+      </div>
+      <div style="padding:24px 32px 32px;">
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
+          <tr>
+            <td style="width:33.33%;padding:0 8px 0 0;">
+              <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:28px;font-weight:700;color:#15803d;">${stats.totalItems}</p>
+                <p style="margin:0;font-size:12px;font-weight:600;color:#16a34a;text-transform:uppercase;letter-spacing:0.05em;">Total Items</p>
+              </div>
+            </td>
+            <td style="width:33.33%;padding:0 4px;">
+              <div style="background-color:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:28px;font-weight:700;color:#c2410c;">${stats.lowStock}</p>
+                <p style="margin:0;font-size:12px;font-weight:600;color:#ea580c;text-transform:uppercase;letter-spacing:0.05em;">Low Stock</p>
+              </div>
+            </td>
+            <td style="width:33.33%;padding:0 0 0 8px;">
+              <div style="background-color:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:28px;font-weight:700;color:#dc2626;">${stats.expiringSoon}</p>
+                <p style="margin:0;font-size:12px;font-weight:600;color:#ef4444;text-transform:uppercase;letter-spacing:0.05em;">Expiring Soon</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <table cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="border-radius:8px;background-color:#6366f1;">
+              <a href="${this.appUrl}" style="display:inline-block;padding:12px 24px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px;">
+                Open StockHome
+              </a>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `);
+    try {
+      await this.getTransporter().sendMail({
+        from: this.from,
+        to: email,
+        subject,
+        text: `Your StockHome weekly summary:\n\nTotal items: ${stats.totalItems}\nLow stock: ${stats.lowStock}\nExpiring soon (7 days): ${stats.expiringSoon}\n\nOpen StockHome: ${this.appUrl}`,
+        html,
+      });
+      this.logger.log(`Weekly summary email sent to ${email}`);
+    } catch (err) {
+      this.logger.error(`Failed to send weekly summary email to ${email}: ${(err as Error).message}`);
     }
   }
 

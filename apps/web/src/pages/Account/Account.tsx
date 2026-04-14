@@ -41,6 +41,14 @@ export function AccountPage() {
   // Delete household
   const [deleteTarget, setDeleteTarget] = useState<Household | null>(null);
 
+  // Notifications section
+  const [notifyExpiryEnabled, setNotifyExpiryEnabled] = useState(user?.notifyExpiryEnabled ?? false);
+  const [notifyExpiryDays, setNotifyExpiryDays] = useState(String(user?.notifyExpiryDays ?? 7));
+  const [notifyWeeklySummary, setNotifyWeeklySummary] = useState(user?.notifyWeeklySummary ?? false);
+  const [weeklyDigestDayOfWeek, setWeeklyDigestDayOfWeek] = useState(String(user?.weeklyDigestDayOfWeek ?? 1));
+  const [notifSaving, setNotifSaving] = useState(false);
+  const [notifMsg, setNotifMsg] = useState<string | null>(null);
+
   useEffect(() => {
     api.get<HouseholdInvitation[]>('/invitations/pending')
       .then((inv) => setPendingInvitations(inv))
@@ -102,6 +110,26 @@ export function AccountPage() {
     await api.delete(`/households/${householdId}`);
     await refreshHouseholds();
     setDeleteTarget(null);
+  }
+
+  async function handleSaveNotifications(e: React.FormEvent) {
+    e.preventDefault();
+    setNotifSaving(true);
+    setNotifMsg(null);
+    try {
+      await api.patch('/users/me/notifications', {
+        notifyExpiryEnabled,
+        notifyExpiryDays: parseInt(notifyExpiryDays, 10) || 7,
+        notifyWeeklySummary,
+        weeklyDigestDayOfWeek: parseInt(weeklyDigestDayOfWeek, 10),
+      });
+      await refreshUser();
+      setNotifMsg(t('account.notifSaved'));
+    } catch {
+      setNotifMsg(t('common.error'));
+    } finally {
+      setNotifSaving(false);
+    }
   }
 
   async function handleLeave(householdId: string) {
@@ -382,6 +410,74 @@ export function AccountPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Notifications */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>{t('account.notificationsSection')}</h2>
+        <form onSubmit={handleSaveNotifications} className={styles.form}>
+          <div className={styles.prefRow}>
+            <span className={styles.prefLabel}>{t('account.notifyExpiry')}</span>
+            <button
+              type="button"
+              className={`${styles.toggleBtn} ${notifyExpiryEnabled ? styles.active : ''}`}
+              onClick={() => setNotifyExpiryEnabled((v) => !v)}
+            >
+              {notifyExpiryEnabled ? 'On' : 'Off'}
+            </button>
+          </div>
+          {notifyExpiryEnabled && (
+            <div className={styles.fieldRow}>
+              <div className={styles.field}>
+                <label htmlFor="expiryDays">{t('account.notifyExpiryDays')}</label>
+                <input
+                  id="expiryDays"
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={notifyExpiryDays}
+                  onChange={(e) => setNotifyExpiryDays(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          <div className={styles.prefRow}>
+            <span className={styles.prefLabel}>{t('account.notifyWeeklySummary')}</span>
+            <button
+              type="button"
+              className={`${styles.toggleBtn} ${notifyWeeklySummary ? styles.active : ''}`}
+              onClick={() => setNotifyWeeklySummary((v) => !v)}
+            >
+              {notifyWeeklySummary ? 'On' : 'Off'}
+            </button>
+          </div>
+          {notifyWeeklySummary && (
+            <div className={styles.field}>
+              <label htmlFor="digestDay">{t('account.weeklyDigestDay')}</label>
+              <select
+                id="digestDay"
+                value={weeklyDigestDayOfWeek}
+                onChange={(e) => setWeeklyDigestDayOfWeek(e.target.value)}
+              >
+                {[
+                  { v: '0', label: 'Sunday' },
+                  { v: '1', label: 'Monday' },
+                  { v: '2', label: 'Tuesday' },
+                  { v: '3', label: 'Wednesday' },
+                  { v: '4', label: 'Thursday' },
+                  { v: '5', label: 'Friday' },
+                  { v: '6', label: 'Saturday' },
+                ].map(({ v, label }) => (
+                  <option key={v} value={v}>{label}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          {notifMsg && <p className={styles.successMsg}>{notifMsg}</p>}
+          <button type="submit" className={styles.saveBtn} disabled={notifSaving}>
+            {notifSaving ? t('common.saving') : t('account.saveNotifications')}
+          </button>
+        </form>
       </section>
 
       {/* Sign out */}

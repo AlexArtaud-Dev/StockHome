@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser, JwtPayload } from '../../common/decorators/current-user.decorator';
-import { ChangePasswordDto, UpdateProfileDto, UserService } from './user.service';
+import { ChangePasswordDto, UpdateNotificationsDto, UpdateProfileDto, UserService } from './user.service';
 
 @Controller('api/v1/users')
 @UseGuards(JwtAuthGuard)
@@ -21,5 +21,10 @@ export class UserController {
   @Post('me/change-password')
   changePassword(@Body() dto: ChangePasswordDto, @CurrentUser() user: JwtPayload) {
     return this.userService.changePassword(user.sub, dto);
+  }
+
+  @Patch('me/notifications')
+  updateNotifications(@Body() dto: UpdateNotificationsDto, @CurrentUser() user: JwtPayload) {
+    return this.userService.updateNotifications(user.sub, dto);
   }
 }

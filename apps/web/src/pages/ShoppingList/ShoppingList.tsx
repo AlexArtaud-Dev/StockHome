@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../../components/Layout/Layout';
 import { useApi } from '../../hooks/useApi';
@@ -12,9 +12,19 @@ export function ShoppingListPage() {
     (signal) => api.get('/shopping-list', signal),
   );
 
-  async function handleCheck(item: ShoppingListItem) {
-    await api.post(`/items/${item.item.id}/stock-rule/renew`);
-    await api.patch(`/items/${item.item.id}/quantity`, { delta: 1 });
+  const [restockingId, setRestockingId] = useState<string | null>(null);
+  const [restockQty, setRestockQty] = useState('1');
+
+  function startRestock(itemId: string) {
+    setRestockingId(itemId);
+    setRestockQty('1');
+  }
+
+  async function confirmRestock(entry: ShoppingListItem) {
+    const qty = Math.max(1, parseInt(restockQty, 10) || 1);
+    setRestockingId(null);
+    await api.post(`/items/${entry.item.id}/stock-rule/renew`);
+    await api.patch(`/items/${entry.item.id}/quantity`, { delta: qty });
     refetch();
   }
 
@@ -33,13 +43,45 @@ export function ShoppingListPage() {
       <div className={styles.list}>
         {items?.map((entry) => (
           <div key={entry.item.id} className={styles.row}>
-            <button
-              className={styles.checkBtn}
-              onClick={() => handleCheck(entry)}
-              aria-label={`Mark ${entry.item.name} as restocked`}
-            >
-              ○
-            </button>
+            {restockingId === entry.item.id ? (
+              <div className={styles.restockInline}>
+                <input
+                  type="number"
+                  min="1"
+                  className={styles.qtyInput}
+                  value={restockQty}
+                  onChange={(e) => setRestockQty(e.target.value)}
+                  autoFocus
+                  aria-label={t('shoppingList.addQty')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') confirmRestock(entry);
+                    if (e.key === 'Escape') setRestockingId(null);
+                  }}
+                />
+                <button
+                  className={styles.confirmBtn}
+                  onClick={() => confirmRestock(entry)}
+                  aria-label={t('shoppingList.confirm')}
+                >
+                  ✓
+                </button>
+                <button
+                  className={styles.cancelBtn}
+                  onClick={() => setRestockingId(null)}
+                  aria-label={t('common.cancel')}
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <button
+                className={styles.checkBtn}
+                onClick={() => startRestock(entry.item.id)}
+                aria-label={`Restock ${entry.item.name}`}
+              >
+                ○
+              </button>
+            )}
             <div className={styles.info}>
               <span className={styles.name}>{entry.item.name}</span>
               <span className={styles.reason}>

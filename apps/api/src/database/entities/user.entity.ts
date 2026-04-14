@@ -50,6 +50,18 @@ export class UserEntity {
   @Column({ type: 'datetime', nullable: true })
   lastVerificationSentAt!: Date | null;
 
+  @Column({ type: 'boolean', default: false })
+  notifyExpiryEnabled!: boolean;
+
+  @Column({ type: 'integer', default: 7 })
+  notifyExpiryDays!: number;
+
+  @Column({ type: 'boolean', default: false })
+  notifyWeeklySummary!: boolean;
+
+  @Column({ type: 'integer', default: 1 })
+  weeklyDigestDayOfWeek!: number; // 0=Sun … 6=Sat
+
   @CreateDateColumn()
   createdAt!: Date;
 }
