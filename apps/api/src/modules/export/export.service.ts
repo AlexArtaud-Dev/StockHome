@@ -88,7 +88,6 @@ export class ExportService {
     }
 
     const looseItems = allItems.filter((i) => !i.containerId);
-
     return { room, rootContainers, looseItems };
   }
 
@@ -101,120 +100,149 @@ export class ExportService {
     const PAGE_H = 842;
     const MARGIN = 48;
     const CONTENT_W = PAGE_W - MARGIN * 2;
+    const HEADER_H = 72;
+    const FOOTER_H = 28;
 
-    // Colors
-    const colorPrimary = rgb(0.388, 0.4, 0.945);   // indigo
-    const colorDark = rgb(0.067, 0.094, 0.153);
-    const colorMuted = rgb(0.42, 0.45, 0.51);
-    const colorBorder = rgb(0.898, 0.902, 0.914);
-    const colorBg = rgb(0.973, 0.973, 0.984);
-    const colorGreen = rgb(0.086, 0.639, 0.294);
-    const colorOrange = rgb(0.95, 0.55, 0.1);
+    const colorPrimary = rgb(0.388, 0.4, 0.945);
+    const colorDark    = rgb(0.067, 0.094, 0.153);
+    const colorMuted   = rgb(0.42, 0.45, 0.51);
+    const colorBorder  = rgb(0.878, 0.882, 0.898);
+    const colorBg      = rgb(0.965, 0.965, 0.98);
+    const colorGreen   = rgb(0.086, 0.639, 0.294);
+    const colorOrange  = rgb(0.95, 0.55, 0.1);
+    const colorWhite   = rgb(1, 1, 1);
+    const colorHeaderSub = rgb(0.78, 0.80, 1);
 
-    let page = doc.addPage([PAGE_W, PAGE_H]);
-    let y = PAGE_H - MARGIN;
+    let page: PDFPage = doc.addPage([PAGE_W, PAGE_H]);
 
-    const newPage = (): PDFPage => {
+    // y tracks the TOP of the next element to draw (decreases downward)
+    let y = PAGE_H;
+
+    const newPage = () => {
       page = doc.addPage([PAGE_W, PAGE_H]);
       y = PAGE_H - MARGIN;
-      return page;
     };
 
     const ensureSpace = (needed: number) => {
-      if (y - needed < MARGIN) newPage();
+      if (y - needed < FOOTER_H + MARGIN) newPage();
     };
 
-    const drawText = (
+    /** Truncate text to fit within maxW at the given size. */
+    const fit = (text: string, font: PDFFont, size: number, maxW: number): string => {
+      if (font.widthOfTextAtSize(text, size) <= maxW) return text;
+      let t = text;
+      while (t.length > 0 && font.widthOfTextAtSize(t + '…', size) > maxW) t = t.slice(0, -1);
+      return t + '…';
+    };
+
+    /**
+     * Draw text vertically centred inside a row.
+     * rowTop = top edge of the row, rowH = row height.
+     * In pdf-lib y is the text baseline. Approximate: baseline = rowTop - rowH/2 - size*0.28
+     */
+    const drawRowText = (
       text: string,
-      opts: { font: PDFFont; size: number; color?: ReturnType<typeof rgb>; x?: number; maxWidth?: number },
+      font: PDFFont,
+      size: number,
+      x: number,
+      rowTop: number,
+      rowH: number,
+      color: ReturnType<typeof rgb>,
+      maxW: number,
     ) => {
-      const x = opts.x ?? MARGIN;
-      const color = opts.color ?? colorDark;
-      const maxWidth = opts.maxWidth ?? CONTENT_W;
-      // Truncate if needed
-      let display = text;
-      while (display.length > 0 && opts.font.widthOfTextAtSize(display, opts.size) > maxWidth) {
-        display = display.slice(0, -1);
-      }
-      if (display !== text) display = display.slice(0, -1) + '…';
-      page.drawText(display, { x, y, font: opts.font, size: opts.size, color });
+      const baseline = rowTop - rowH / 2 - size * 0.28;
+      page.drawText(fit(text, font, size, maxW), { x, y: baseline, font, size, color });
     };
 
-    // ── Header ─────────────────────────────────────────────────────
-    page.drawRectangle({ x: 0, y: PAGE_H - 70, width: PAGE_W, height: 70, color: colorPrimary });
-    page.drawText('StockHome', { x: MARGIN, y: PAGE_H - 42, font: fontBold, size: 16, color: rgb(1, 1, 1) });
-    const titleWidth = fontBold.widthOfTextAtSize(title, 13);
-    const titleX = PAGE_W - MARGIN - titleWidth;
-    page.drawText(title, { x: titleX, y: PAGE_H - 42, font: fontBold, size: 13, color: rgb(1, 1, 1) });
+    // ── Page 1 header ──────────────────────────────────────────────
+    page.drawRectangle({ x: 0, y: PAGE_H - HEADER_H, width: PAGE_W, height: HEADER_H, color: colorPrimary });
 
+    // "StockHome" top-left, date below
+    page.drawText('StockHome', {
+      x: MARGIN, y: PAGE_H - HEADER_H / 2 - 4,
+      font: fontBold, size: 16, color: colorWhite,
+    });
     const exportDate = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
-    page.drawText(`Exported on ${exportDate}`, { x: MARGIN, y: PAGE_H - 58, font: fontRegular, size: 9, color: rgb(0.8, 0.82, 1) });
+    page.drawText(`Exported on ${exportDate}`, {
+      x: MARGIN, y: PAGE_H - HEADER_H / 2 + 14,
+      font: fontRegular, size: 9, color: colorHeaderSub,
+    });
 
-    y = PAGE_H - 70 - 28;
+    // Household name — top-right, vertically centred in header
+    const hNameW = fontBold.widthOfTextAtSize(title, 13);
+    page.drawText(title, {
+      x: PAGE_W - MARGIN - hNameW, y: PAGE_H - HEADER_H / 2 - 4,
+      font: fontBold, size: 13, color: colorWhite,
+    });
+
+    y = PAGE_H - HEADER_H - 24;
 
     // ── Document title ─────────────────────────────────────────────
-    drawText(title, { font: fontBold, size: 20, color: colorDark });
-    y -= 32;
+    const TITLE_SIZE = 22;
+    page.drawText(fit(title, fontBold, TITLE_SIZE, CONTENT_W), {
+      x: MARGIN, y,
+      font: fontBold, size: TITLE_SIZE, color: colorDark,
+    });
+    y -= TITLE_SIZE + 20;
 
+    // ── Container node renderer ────────────────────────────────────
     const drawContainerNode = (node: ContainerNode, depth: number) => {
-      const indent = depth * 16;
-      const lineH = 22;
-      const iconSize = 8;
-      const dotX = MARGIN + indent + 4;
+      const indent  = depth * 20;
+      const rowH    = depth === 0 ? 26 : 22;
+      const dotSize = depth === 0 ? 4 : 3;
+      const dotX    = MARGIN + indent + 10;
+      const textX   = MARGIN + indent + 22;
+      const textMaxW = CONTENT_W - indent - 24 - 50; // leave room for qty on right
 
-      ensureSpace(lineH + 6);
+      ensureSpace(rowH + 4);
 
-      // Container row background (subtle for depth > 0)
+      // Background strip for root containers
       if (depth === 0) {
         page.drawRectangle({
-          x: MARGIN + indent,
-          y: y - 4,
-          width: CONTENT_W - indent,
-          height: lineH,
+          x: MARGIN,
+          y: y - rowH,
+          width: CONTENT_W,
+          height: rowH,
           color: colorBg,
           borderColor: colorBorder,
           borderWidth: 0.5,
-          opacity: 0.8,
         });
       }
 
-      // Connector dot
-      page.drawCircle({ x: dotX, y: y + lineH / 2 - 2, size: iconSize / 2 + (depth === 0 ? 1 : 0), color: colorPrimary, opacity: depth === 0 ? 1 : 0.5 });
+      // Dot — vertically centred in the row
+      const dotCY = y - rowH / 2;
+      page.drawCircle({ x: dotX, y: dotCY, size: dotSize, color: colorPrimary, opacity: depth === 0 ? 1 : 0.5 });
 
-      const nameX = dotX + 10;
-      drawText(node.container.name, {
-        font: depth === 0 ? fontBold : fontRegular,
-        size: depth === 0 ? 11 : 10,
-        color: depth === 0 ? colorDark : colorMuted,
-        x: nameX,
-        maxWidth: CONTENT_W - indent - 20,
-      });
-      y -= lineH;
+      // Container name — vertically centred
+      drawRowText(
+        node.container.name,
+        depth === 0 ? fontBold : fontRegular,
+        depth === 0 ? 11 : 10,
+        textX, y, rowH,
+        depth === 0 ? colorDark : colorMuted,
+        textMaxW,
+      );
+
+      y -= rowH;
 
       // Items in this container
+      const ITEM_H = 18;
       for (const item of node.items) {
-        ensureSpace(18);
-        const itemIndent = indent + 20;
+        ensureSpace(ITEM_H);
+        const itemX   = MARGIN + indent + 24;
+        const itemMaxW = CONTENT_W - indent - 26 - 50;
         const qtyColor = item.quantity === 0 ? colorOrange : item.quantity > 1 ? colorGreen : colorMuted;
 
-        drawText(`• ${item.name}`, {
-          font: fontRegular,
-          size: 9,
-          color: colorMuted,
-          x: MARGIN + itemIndent,
-          maxWidth: CONTENT_W - itemIndent - 50,
-        });
+        // Item name — centred in item row
+        drawRowText(`• ${item.name}`, fontRegular, 9, itemX, y, ITEM_H, colorMuted, itemMaxW);
 
+        // Quantity — right-aligned, same baseline
         const qtyLabel = `× ${item.quantity}`;
         const qtyW = fontBold.widthOfTextAtSize(qtyLabel, 9);
-        page.drawText(qtyLabel, {
-          x: MARGIN + CONTENT_W - qtyW,
-          y,
-          font: fontBold,
-          size: 9,
-          color: qtyColor,
-        });
-        y -= 16;
+        const baseline = y - ITEM_H / 2 - 9 * 0.28;
+        page.drawText(qtyLabel, { x: MARGIN + CONTENT_W - qtyW, y: baseline, font: fontBold, size: 9, color: qtyColor });
+
+        y -= ITEM_H;
       }
 
       // Child containers
@@ -222,47 +250,61 @@ export class ExportService {
         drawContainerNode(child, depth + 1);
       }
 
-      if (depth === 0) y -= 4;
+      // Gap after root container
+      if (depth === 0) y -= 6;
     };
 
+    // ── Rooms ──────────────────────────────────────────────────────
+    const ROOM_H  = 30;
+    const ITEM_H  = 18;
+
     for (const roomNode of roomNodes) {
-      ensureSpace(40);
+      ensureSpace(ROOM_H + 16);
 
       // Room header bar
-      page.drawRectangle({ x: MARGIN, y: y - 6, width: CONTENT_W, height: 28, color: colorPrimary, opacity: 0.12 });
-      page.drawRectangle({ x: MARGIN, y: y - 6, width: 4, height: 28, color: colorPrimary });
-      drawText(roomNode.room.name.toUpperCase(), { font: fontBold, size: 11, color: colorPrimary, x: MARGIN + 12, maxWidth: CONTENT_W - 20 });
-      y -= 32;
+      page.drawRectangle({ x: MARGIN, y: y - ROOM_H, width: CONTENT_W, height: ROOM_H, color: colorPrimary, opacity: 0.1 });
+      page.drawRectangle({ x: MARGIN, y: y - ROOM_H, width: 4, height: ROOM_H, color: colorPrimary });
 
-      // Loose items (not in a container)
+      drawRowText(
+        roomNode.room.name.toUpperCase(),
+        fontBold, 11,
+        MARGIN + 14, y, ROOM_H,
+        colorPrimary, CONTENT_W - 20,
+      );
+      y -= ROOM_H + 4;
+
+      // Loose items
       for (const item of roomNode.looseItems) {
-        ensureSpace(18);
+        ensureSpace(ITEM_H);
         const qtyColor = item.quantity === 0 ? colorOrange : item.quantity > 1 ? colorGreen : colorMuted;
-        drawText(`• ${item.name}`, { font: fontRegular, size: 9, color: colorMuted, x: MARGIN + 8, maxWidth: CONTENT_W - 60 });
+
+        drawRowText(`• ${item.name}`, fontRegular, 9, MARGIN + 10, y, ITEM_H, colorMuted, CONTENT_W - 60);
+
         const qtyLabel = `× ${item.quantity}`;
         const qtyW = fontBold.widthOfTextAtSize(qtyLabel, 9);
-        page.drawText(qtyLabel, { x: MARGIN + CONTENT_W - qtyW, y, font: fontBold, size: 9, color: qtyColor });
-        y -= 16;
+        const baseline = y - ITEM_H / 2 - 9 * 0.28;
+        page.drawText(qtyLabel, { x: MARGIN + CONTENT_W - qtyW, y: baseline, font: fontBold, size: 9, color: qtyColor });
+
+        y -= ITEM_H;
       }
 
-      // Containers
       for (const rootNode of roomNode.rootContainers) {
         drawContainerNode(rootNode, 0);
       }
 
-      y -= 12;
+      y -= 16; // gap between rooms
     }
 
-    // Page numbers
+    // ── Page numbers ───────────────────────────────────────────────
     const pages = doc.getPages();
     const total = pages.length;
     pages.forEach((p, i) => {
-      p.drawText(`${i + 1} / ${total}`, {
-        x: PAGE_W / 2 - 10,
-        y: MARGIN / 2,
-        font: fontRegular,
-        size: 9,
-        color: colorMuted,
+      const numStr = `${i + 1} / ${total}`;
+      const numW = fontRegular.widthOfTextAtSize(numStr, 9);
+      p.drawText(numStr, {
+        x: PAGE_W / 2 - numW / 2,
+        y: FOOTER_H / 2,
+        font: fontRegular, size: 9, color: colorMuted,
       });
     });
 
