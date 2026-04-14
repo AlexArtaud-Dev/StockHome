@@ -1,6 +1,8 @@
 services:
   api:
     image: ghcr.io/alexartaud-dev/stockhome-api:latest
+    ports:
+      - "${API_PORT:-4541}:3001"
     volumes:
       - stockhome_data:/app/data
     env_file:
@@ -34,7 +36,7 @@ services:
   web:
     image: ghcr.io/alexartaud-dev/stockhome-web:latest
     ports:
-      - "${APP_PORT:-3000}:80"
+      - "${APP_PORT:-4540}:80"
     depends_on:
       api:
         condition: service_healthy
