@@ -1,19 +1,30 @@
 services:
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
-    ports:
-      - "3001:3001"
+    image: ghcr.io/alexartaud-dev/stockhome-api:latest
     volumes:
-      - ./data:/app/data
+      - stockhome_data:/app/data
+    env_file:
+      - stack.env
     environment:
-      - JWT_SECRET=${JWT_SECRET:-change_me_in_production}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change_me_refresh_secret}
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - DB_PATH=/app/data/stockhome.db
       - UPLOAD_DIR=/app/data/uploads
       - PORT=3001
+      - MAX_CONTAINER_DEPTH=${MAX_CONTAINER_DEPTH}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - FIRST_LAUNCH=${FIRST_LAUNCH}
+      - APP_URL=${APP_URL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
     restart: unless-stopped
+    networks:
+      - stockhome_net
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/api/v1/health"]
       interval: 30s
@@ -21,11 +32,20 @@ services:
       retries: 3
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile.web
+    image: ghcr.io/alexartaud-dev/stockhome-web:latest
     ports:
-      - "3000:80"
+      - "${APP_PORT:-3000}:80"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - stockhome_net
+
+volumes:
+  stockhome_data:
+    driver: local
+
+networks:
+  stockhome_net:
+    driver: bridge
