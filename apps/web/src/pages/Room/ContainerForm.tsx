@@ -11,9 +11,10 @@ interface Props {
   parentContainerId?: string;
   onClose: () => void;
   onSaved: () => void;
+  onDeleted?: () => void;
 }
 
-export function ContainerForm({ roomId, container, parentContainerId, onClose, onSaved }: Props) {
+export function ContainerForm({ roomId, container, parentContainerId, onClose, onSaved, onDeleted }: Props) {
   const { t } = useTranslation();
   const isEdit = Boolean(container);
   const [name, setName] = useState(container?.name ?? '');
@@ -67,8 +68,12 @@ export function ContainerForm({ roomId, container, parentContainerId, onClose, o
     setIsDeleting(true);
     try {
       await api.delete(`/containers/${container.id}`);
-      onSaved();
       onClose();
+      if (onDeleted) {
+        onDeleted();
+      } else {
+        onSaved();
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('common.error'));
       setIsDeleting(false);

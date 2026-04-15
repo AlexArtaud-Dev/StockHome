@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Box, ChevronRight, Edit2, Package, Plus, QrCode, X } from 'lucide-react';
 import { Tooltip } from '../../components/Tooltip/Tooltip';
@@ -16,6 +16,7 @@ import styles from './Container.module.css';
 export function ContainerPage() {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [optimisticQuantities, setOptimisticQuantities] = useState<Record<string, number>>({});
   const [showAddItem, setShowAddItem] = useState(false);
   const [editItem, setEditItem] = useState<Item | null>(null);
@@ -249,7 +250,14 @@ export function ContainerPage() {
           roomId={container.roomId}
           container={container}
           onClose={() => setShowEditContainer(false)}
-          onSaved={() => { refetchContainer(); refetch(); }}
+          onSaved={() => { refetchContainer(); refetchSubs(); refetch(); }}
+          onDeleted={() => {
+            if (container.parentContainerId) {
+              navigate(`/containers/${container.parentContainerId}`);
+            } else {
+              navigate(`/rooms/${container.roomId}`);
+            }
+          }}
         />
       )}
       {showAddSubContainer && container && (
