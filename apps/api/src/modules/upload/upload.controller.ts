@@ -45,8 +45,13 @@ export class UploadController {
   ) {
     return { path: `/uploads/${file.filename}` };
   }
+}
 
-  @Get('/uploads/:filename')
+// Separate controller so the /uploads/:filename route is public
+// and doesn't conflict with the JwtAuthGuard on UploadController
+@Controller('uploads')
+export class UploadServeController {
+  @Get(':filename')
   @Public()
   serveFile(@Param('filename') filename: string, @Res() res: Response) {
     const uploadDir = process.env['UPLOAD_DIR'] ?? './data/uploads';
@@ -54,7 +59,7 @@ export class UploadController {
     const filePath = path.join(uploadDirResolved, filename);
 
     // Prevent path traversal attacks
-    if (!filePath.startsWith(uploadDirResolved + path.sep) && filePath !== uploadDirResolved) {
+    if (!filePath.startsWith(uploadDirResolved + path.sep)) {
       throw new NotFoundException();
     }
 
