@@ -49,10 +49,10 @@ export class ContainerEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne(() => RoomEntity, (room) => room.containers)
+  @ManyToOne(() => RoomEntity, (room) => room.containers, { onDelete: 'CASCADE' })
   room!: RoomEntity;
 
-  @ManyToOne(() => ContainerEntity, (container) => container.children, { nullable: true })
+  @ManyToOne(() => ContainerEntity, (container) => container.children, { nullable: true, onDelete: 'CASCADE' })
   parentContainer!: ContainerEntity | null;
 
   @OneToMany(() => ContainerEntity, (container) => container.parentContainer)

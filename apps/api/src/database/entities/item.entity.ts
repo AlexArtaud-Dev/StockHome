@@ -59,10 +59,10 @@ export class ItemEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne(() => ContainerEntity, (container) => container.items, { nullable: true })
+  @ManyToOne(() => ContainerEntity, (container) => container.items, { nullable: true, onDelete: 'CASCADE' })
   container!: ContainerEntity | null;
 
-  @ManyToOne(() => RoomEntity, (room) => room.items)
+  @ManyToOne(() => RoomEntity, (room) => room.items, { onDelete: 'CASCADE' })
   room!: RoomEntity;
 
   @ManyToMany(() => CategoryEntity, (category) => category.items, { eager: false })

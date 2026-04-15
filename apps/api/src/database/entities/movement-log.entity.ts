@@ -30,7 +30,7 @@ export class MovementLogEntity {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @ManyToOne(() => ItemEntity)
+  @ManyToOne(() => ItemEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'itemId' })
   item!: ItemEntity;
 

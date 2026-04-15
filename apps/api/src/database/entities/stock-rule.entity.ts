@@ -32,7 +32,7 @@ export class StockRuleEntity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @OneToOne(() => ItemEntity, (item) => item.stockRule)
+  @OneToOne(() => ItemEntity, (item) => item.stockRule, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'itemId' })
   item!: ItemEntity;
 }
