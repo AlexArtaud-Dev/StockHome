@@ -14,7 +14,6 @@ if (result.error) {
 }
 
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import * as fs from 'fs';
 import cookieParser from 'cookie-parser';
@@ -27,12 +26,9 @@ async function bootstrap() {
   fs.mkdirSync(dbDir, { recursive: true });
   fs.mkdirSync(uploadDir, { recursive: true });
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
-
-  // Serve uploaded files at /uploads/<filename>
-  app.useStaticAssets(path.resolve(uploadDir), { prefix: '/uploads' });
 
   app.enableCors({
     origin: process.env['CORS_ORIGIN'] ?? 'http://localhost:3000',

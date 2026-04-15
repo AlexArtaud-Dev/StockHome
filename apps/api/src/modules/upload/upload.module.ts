@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { UploadController } from './upload.controller';
+import { UploadController, UploadServeController } from './upload.controller';
 
 @Module({
-  controllers: [UploadController],
+  controllers: [UploadController, UploadServeController],
 })
 export class UploadModule {}

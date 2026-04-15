@@ -1,8 +1,12 @@
 import {
   Controller,
+  Get,
   MaxFileSizeValidator,
+  NotFoundException,
+  Param,
   ParseFilePipe,
   Post,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -10,8 +14,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
+import * as fs from 'fs';
+import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('api/v1/upload')
 @UseGuards(JwtAuthGuard)
@@ -37,5 +44,29 @@ export class UploadController {
     file: Express.Multer.File,
   ) {
     return { path: `/uploads/${file.filename}` };
+  }
+}
+
+// Separate controller so the /uploads/:filename route is public
+// and doesn't conflict with the JwtAuthGuard on UploadController
+@Controller('uploads')
+export class UploadServeController {
+  @Get(':filename')
+  @Public()
+  serveFile(@Param('filename') filename: string, @Res() res: Response) {
+    const uploadDir = process.env['UPLOAD_DIR'] ?? './data/uploads';
+    const uploadDirResolved = path.resolve(uploadDir);
+    const filePath = path.join(uploadDirResolved, filename);
+
+    // Prevent path traversal attacks
+    if (!filePath.startsWith(uploadDirResolved + path.sep)) {
+      throw new NotFoundException();
+    }
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException();
+    }
+
+    res.sendFile(filePath);
   }
 }
